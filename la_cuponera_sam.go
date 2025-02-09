@@ -42,7 +42,7 @@ func NewLaCuponeraSamStack(scope constructs.Construct, id string, props *LaCupon
 	couponsLambda := awslambda.NewFunction(stack, jsii.String("LaCuponeraCouponsLambda"), &awslambda.FunctionProps{
 		Runtime: awslambda.Runtime_PROVIDED_AL2023(),
 		Handler: jsii.String("main"),
-		Code:    awslambda.Code_FromAsset(jsii.String("lambda/functions/couponFunction/couponsFunction.zip"), nil),
+		Code:    awslambda.AssetCode_FromAsset(jsii.String("lambda/functions/couponFunction/couponsFunction.zip"), nil),
 		Environment: &map[string]*string{
 			"TABLE_NAME": table.TableName(),
 		},
@@ -52,7 +52,7 @@ func NewLaCuponeraSamStack(scope constructs.Construct, id string, props *LaCupon
 	usersLambda := awslambda.NewFunction(stack, jsii.String("LaCuponeraUsersLambda"), &awslambda.FunctionProps{
 		Runtime: awslambda.Runtime_PROVIDED_AL2023(),
 		Handler: jsii.String("main"),
-		Code:    awslambda.Code_FromAsset(jsii.String("lambda/functions/userFunction/usersFunction.zip"), nil),
+		Code:    awslambda.AssetCode_FromAsset(jsii.String("lambda/functions/userFunction/usersFunction.zip"), nil),
 		Environment: &map[string]*string{
 			"TABLE_NAME": table.TableName(),
 		},
@@ -62,7 +62,7 @@ func NewLaCuponeraSamStack(scope constructs.Construct, id string, props *LaCupon
 	loginLambda := awslambda.NewFunction(stack, jsii.String("LaCuponeraLoginLambda"), &awslambda.FunctionProps{
 		Runtime: awslambda.Runtime_PROVIDED_AL2023(),
 		Handler: jsii.String("main"),
-		Code:    awslambda.Code_FromAsset(jsii.String("lambda/functions/loginFunction/loginFunction.zip"), nil),
+		Code:    awslambda.AssetCode_FromAsset(jsii.String("lambda/functions/loginFunction/loginFunction.zip"), nil),
 		Environment: &map[string]*string{
 			"TABLE_NAME": table.TableName(),
 		},

@@ -74,12 +74,6 @@ type RegisteredCoupon struct {
 	Status   string `dynamodbav:"status" json:"status"`
 }
 
-type CouponDetails struct {
-	Location            string `dynamodbav:"location" json:"location"`
-	ScheduleDescription string `dynamodbav:"scheduleDescription" json:"scheduleDescription"`
-	PhoneNumber         string `dynamodbav:"phoneNumber" json:"phoneNumber"`
-}
-
 type Coupon struct {
 	Entity
 	Id           string    `dynamodbav:"id" json:"id"`
@@ -98,9 +92,7 @@ type Coupon struct {
 
 	// Can have any structure for other properties defined in the UI
 	// the idea is that is a nested details object
-	Details      CouponDetails `dynamodbav:"details" json:"details,omitempty" validate:"omitempty"`
-	EnterpriseId string        `dynamodbav:"enterpriseCode" json:"enterpriseCode" validate:"required"`
-	Category     string        `dynamodbav:"category" json:"category" validate:"required"` // same as the enterprise category defined above
+	EnterpriseId string `dynamodbav:"enterpriseCode" json:"enterpriseCode" validate:"required"`
 }
 
 // struct for a generated coupon (the one that user buys, not the general offer)

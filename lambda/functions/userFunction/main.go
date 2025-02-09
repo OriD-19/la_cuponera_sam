@@ -25,13 +25,13 @@ func main() {
 
 	lambda.Start(func(ctx context.Context, request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
 		switch request.Path {
-		case "/user/{userId}/profile":
+		case "/users/{userId}/profile":
 			switch request.HTTPMethod {
 			case "GET":
 				return handler.GetClient(ctx, request)
 				// TODO: Implement PUT/PATCH methods for updating user profile
 			}
-		case "/user/client/register":
+		case "/users/client/register":
 			return handler.RegisterClient(ctx, request)
 		}
 

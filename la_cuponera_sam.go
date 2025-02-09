@@ -86,8 +86,9 @@ func NewLaCuponeraSamStack(scope constructs.Construct, id string, props *LaCupon
 			AllowMethods: jsii.Strings("GET", "POST", "PUT", "DELETE"),
 		},
 		DeployOptions: &awsapigateway.StageOptions{
-			LoggingLevel: awsapigateway.MethodLoggingLevel_INFO,
-			StageName:    jsii.String("v1"),
+			// enable logging (maybe, who cares)
+			//LoggingLevel: awsapigateway.MethodLoggingLevel_INFO,
+			StageName: jsii.String("v1"),
 		},
 		RestApiName: jsii.String("LaCuponeraApi"),
 	})

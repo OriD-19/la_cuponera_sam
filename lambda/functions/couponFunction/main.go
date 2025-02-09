@@ -31,6 +31,9 @@ func main() {
 			case "GET":
 				return handler.GetAllCouponsHandler(ctx, request)
 				// TODO add POST method for administrator to upload coupons
+			case "POST":
+				// TODO: protect this route. For convenience, is open for now
+				return handler.PutCouponHandler(ctx, request)
 			}
 		case "/coupons/category/{category}":
 			return handler.GetAllCouponsFromCategoryHandler(ctx, request)

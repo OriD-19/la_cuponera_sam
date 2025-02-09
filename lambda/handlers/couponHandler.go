@@ -117,6 +117,7 @@ func (handler *APIGatewayHandler) BuyCouponHandler(ctx context.Context, request 
 }
 
 func (handler *APIGatewayHandler) GetUserOffersHandler(ctx context.Context, request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
+	// extract user id from jwt token
 	id, ok := request.PathParameters["userId"]
 
 	if !ok {

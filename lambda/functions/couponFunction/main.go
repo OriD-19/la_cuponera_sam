@@ -4,6 +4,7 @@ import (
 	"OriD19/webdev2/database"
 	"OriD19/webdev2/domain"
 	"OriD19/webdev2/handlers"
+	"OriD19/webdev2/middleware"
 	"context"
 	"os"
 
@@ -36,9 +37,16 @@ func main() {
 		case "/coupons/{id}":
 			return handler.GetCouponHandler(ctx, request)
 		case "/coupons/buy":
-			return handler.BuyCouponHandler(ctx, request)
+			// protected route: only clients can buy coupons
+			return middleware.ValidateClientJWTMiddleware(handler.BuyCouponHandler)(ctx, request)
+		case "/offers/allFromUser/{userId}":
+			return middleware.ValidateClientJWTMiddleware(handler.GetUserOffersHandler)(ctx, request)
+			// TODO add POST method for administrator to upload offers
+		case "/offers/{offerId}":
+			return middleware.ValidateClientJWTMiddleware(handler.GetUserOfferHandler)(ctx, request)
 		case "/offers/{offerId}/redeem":
-			return handler.RedeemCouponHandler(ctx, request)
+			// only employees can redeem offers
+			return middleware.ValidateEmployeeJWTMiddleware(handler.RedeemCouponHandler)(ctx, request)
 		default:
 			return events.APIGatewayProxyResponse{
 				StatusCode: 404,

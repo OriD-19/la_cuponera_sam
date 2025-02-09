@@ -1,13 +1,14 @@
 package types
 
 import (
+	"os"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
 	"golang.org/x/crypto/bcrypt"
 )
 
-const SECRET = "secret"
+var SECRET = os.Getenv("SECRET")
 
 // ************************************************************
 // USER ENTITIES
@@ -112,13 +113,13 @@ type GeneratedOffer struct {
 }
 
 type CouponRange struct {
-	Coupons []Coupon
-	Next    *string
+	Coupons []Coupon `json:"coupons"`
+	Next    *string  `json:"next"`
 }
 
 type OfferRange struct {
-	Offers []GeneratedOffer
-	Next   *string
+	Offers []GeneratedOffer `json:"offers"`
+	Next   *string          `json:"next"`
 }
 
 func ValidatePassword(hashedPassword, plainTextPassword string) bool {

@@ -2,8 +2,10 @@ package middleware
 
 import (
 	"OriD19/webdev2/handlers"
+	"context"
 	"fmt"
 	"net/http"
+	"os"
 	"strings"
 	"time"
 
@@ -39,8 +41,8 @@ func ValidateJWTMiddleware(next func(events.APIGatewayProxyRequest) (events.APIG
 }
 
 // client authorization header
-func ValidateClientJWTMiddleware(next func(events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error)) func(events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
-	return func(request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
+func ValidateClientJWTMiddleware(next func(context.Context, events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error)) func(context.Context, events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
+	return func(c context.Context, request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
 		tokenString := extractTokenFromHeaders(request.Headers)
 
 		if strings.TrimSpace(tokenString) == "" {
@@ -65,13 +67,13 @@ func ValidateClientJWTMiddleware(next func(events.APIGatewayProxyRequest) (event
 			return handlers.Response(http.StatusUnauthorized, "client role required"), nil
 		}
 
-		return next(request)
+		return next(c, request)
 	}
 }
 
 // employee authorization header
-func ValidateEmployeeJWTMiddleware(next func(events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error)) func(events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
-	return func(request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
+func ValidateEmployeeJWTMiddleware(next func(context.Context, events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error)) func(context.Context, events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
+	return func(c context.Context, request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
 		tokenString := extractTokenFromHeaders(request.Headers)
 
 		if strings.TrimSpace(tokenString) == "" {
@@ -96,7 +98,7 @@ func ValidateEmployeeJWTMiddleware(next func(events.APIGatewayProxyRequest) (eve
 			return handlers.Response(http.StatusUnauthorized, "employee role required"), nil
 		}
 
-		return next(request)
+		return next(c, request)
 	}
 }
 
@@ -118,7 +120,7 @@ func extractTokenFromHeaders(headers map[string]string) string {
 
 func parseToken(tokenString string) (jwt.MapClaims, error) {
 	token, err := jwt.Parse(tokenString, func(t *jwt.Token) (interface{}, error) {
-		secret := []byte("secret")
+		secret := []byte(os.Getenv("SECRET"))
 		return secret, nil
 	})
 

@@ -156,8 +156,9 @@ func NewLaCuponeraSamStack(scope constructs.Construct, id string, props *LaCupon
 	usersResource.AddMethod(jsii.String("GET"), usersIntegration, nil)
 
 	// register a new user of type client
-	// POST /users/client
+	// POST /users/client/register
 	usersResource.AddResource(jsii.String("client"), nil).
+		AddResource(jsii.String("register"), nil).
 		AddMethod(jsii.String("POST"), usersIntegration, nil)
 
 	// GET /users/{id}

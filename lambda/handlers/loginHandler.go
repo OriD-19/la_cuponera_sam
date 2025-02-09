@@ -12,14 +12,10 @@ import (
 )
 
 // for logging out, just delete the token from the client
-type LoginRequest struct {
-	Username string `json:"email" validator:"required"`
-	Password string `json:"password" validator:"required,email"`
-}
 
 func (handler *APIGatewayHandler) LoginClient(ctx context.Context, request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
 
-	var loginRequest LoginRequest
+	var loginRequest types.LoginRequest
 
 	err := json.Unmarshal([]byte(request.Body), &loginRequest)
 
@@ -55,7 +51,7 @@ func (handler *APIGatewayHandler) LoginClient(ctx context.Context, request event
 
 func (handler *APIGatewayHandler) LoginEmployee(ctx context.Context, request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
 
-	var loginRequest LoginRequest
+	var loginRequest types.LoginRequest
 
 	err := json.Unmarshal([]byte(request.Body), &loginRequest)
 

@@ -22,35 +22,45 @@ func NewUsersDomain(s types.UserStore) *Users {
 }
 
 func (u *Users) RegisterClient(ctx context.Context, body []byte) (*types.Client, error) {
-	var client types.Client
+	var clientRegisterRequest types.RegisterClientRequest
 
-	err := json.Unmarshal(body, &client)
+	err := json.Unmarshal(body, &clientRegisterRequest)
 
 	if err != nil {
 		return &types.Client{}, err
 	}
 
 	validate := validator.New()
-
-	err = validate.Struct(client)
+	err = validate.Struct(clientRegisterRequest)
 
 	if err != nil {
 		return &types.Client{}, err
 	}
 
 	// check if email is not taken
-	_, err = u.store.GetClient(ctx, client.Email)
+	_, err = u.store.GetClient(ctx, clientRegisterRequest.Email)
 
 	if err == nil {
-		return &types.Client{}, fmt.Errorf("email %s is already taken", client.Email)
+		return &types.Client{}, fmt.Errorf("email %s is already taken", clientRegisterRequest.Email)
 	}
 
 	// hash password before storing the user
-	err = client.HashPassword()
+	hashedPassword, err := types.HashPassword(clientRegisterRequest.Password)
 
 	if err != nil {
 		return &types.Client{}, err
 	}
+
+	// populate the newly created user
+	client := types.Client{}
+	client.Email = clientRegisterRequest.Email
+	client.Username = clientRegisterRequest.Username
+	client.FirstName = clientRegisterRequest.FirstName
+	client.Password = hashedPassword
+	client.LastName = clientRegisterRequest.LastName
+	client.Address = clientRegisterRequest.Address
+	client.PhoneNumber = clientRegisterRequest.PhoneNumber
+	client.DUI = clientRegisterRequest.DUI
 
 	err = u.store.RegisterClient(ctx, client)
 
@@ -61,6 +71,56 @@ func (u *Users) RegisterClient(ctx context.Context, body []byte) (*types.Client,
 	return &client, nil
 }
 
+func (u *Users) RegisterEmployee(ctx context.Context, body []byte) (*types.Employee, error) {
+
+	var employeeRegisterRequest types.RegisterEmployeeRequest
+
+	err := json.Unmarshal(body, &employeeRegisterRequest)
+
+	if err != nil {
+		return &types.Employee{}, err
+	}
+
+	validate := validator.New()
+	err = validate.Struct(employeeRegisterRequest)
+
+	if err != nil {
+		return &types.Employee{}, err
+	}
+
+	_, err = u.store.GetEmployee(ctx, employeeRegisterRequest.Email)
+
+	if err == nil {
+		return &types.Employee{}, fmt.Errorf("email %s is already taken", employeeRegisterRequest.Email)
+	}
+
+	// hash password before storing the user
+	hashedPassword, err := types.HashPassword(employeeRegisterRequest.Password)
+
+	if err != nil {
+		return &types.Employee{}, err
+	}
+
+	employee := types.Employee{}
+	employee.Email = employeeRegisterRequest.Email
+	employee.Username = employeeRegisterRequest.Username
+	employee.FirstName = employeeRegisterRequest.FirstName
+	employee.Password = hashedPassword
+	employee.LastName = employeeRegisterRequest.LastName
+	employee.PhoneNumber = employeeRegisterRequest.PhoneNumber
+	employee.DUI = employeeRegisterRequest.DUI
+
+	err = u.store.RegisterEmployee(ctx, employee)
+
+	if err != nil {
+		return &types.Employee{}, err
+	}
+
+	return &employee, nil
+}
+
+// TODO: Implement the rest of the user registration methods
+/*
 func (u *Users) RegisterEnterprise(ctx context.Context, body []byte) (*types.Enterprise, error) {
 
 	var enterprise types.Enterprise
@@ -141,45 +201,7 @@ func (u *Users) RegisterAdministrator(ctx context.Context, body []byte) (*types.
 	return &administrator, nil
 }
 
-func (u *Users) RegisterEmployee(ctx context.Context, body []byte) (*types.Employee, error) {
-
-	var employee types.Employee
-
-	err := json.Unmarshal(body, &employee)
-
-	if err != nil {
-		return &types.Employee{}, err
-	}
-
-	validate := validator.New()
-
-	err = validate.Struct(employee)
-
-	if err != nil {
-		return &types.Employee{}, err
-	}
-
-	_, err = u.store.GetEmployee(ctx, employee.Email)
-
-	if err == nil {
-		return &types.Employee{}, fmt.Errorf("email %s is already taken", employee.Email)
-	}
-
-	// hash password before storing the user
-	err = employee.HashPassword()
-
-	if err != nil {
-		return &types.Employee{}, err
-	}
-
-	err = u.store.RegisterEmployee(ctx, employee)
-
-	if err != nil {
-		return &types.Employee{}, err
-	}
-
-	return &employee, nil
-}
+*/
 
 func (u *Users) GetClient(ctx context.Context, username string) (*types.Client, error) {
 	client, err := u.store.GetClient(ctx, username)
@@ -191,6 +213,18 @@ func (u *Users) GetClient(ctx context.Context, username string) (*types.Client, 
 	return &client, nil
 }
 
+func (u *Users) GetEmployee(ctx context.Context, username string) (*types.Employee, error) {
+	employee, err := u.store.GetEmployee(ctx, username)
+
+	if err != nil {
+		return &types.Employee{}, err
+	}
+
+	return &employee, nil
+}
+
+// TODO Implement the rest of the user retrieval methods
+/*
 func (u *Users) GetEnterprise(ctx context.Context, username string) (*types.Enterprise, error) {
 	enterprise, err := u.store.GetEnterprise(ctx, username)
 
@@ -211,12 +245,4 @@ func (u *Users) GetAdministrator(ctx context.Context, username string) (*types.A
 	return &administrator, nil
 }
 
-func (u *Users) GetEmployee(ctx context.Context, username string) (*types.Employee, error) {
-	employee, err := u.store.GetEmployee(ctx, username)
-
-	if err != nil {
-		return &types.Employee{}, err
-	}
-
-	return &employee, nil
-}
+*/

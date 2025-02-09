@@ -31,6 +31,8 @@ func main() {
 				return handler.GetClient(ctx, request)
 				// TODO: Implement PUT/PATCH methods for updating user profile
 			}
+		case "/user/client/register":
+			return handler.RegisterClient(ctx, request)
 		}
 
 		return events.APIGatewayProxyResponse{

@@ -23,6 +23,7 @@ func (handler *APIGatewayHandler) RegisterClient(ctx context.Context, request ev
 	return Response(http.StatusOK, client), nil
 }
 
+/*
 func (handler *APIGatewayHandler) RegisterEnterprise(ctx context.Context, request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
 
 	enterprise, err := handler.users.RegisterEnterprise(ctx, []byte(request.Body))
@@ -48,14 +49,16 @@ func (handler *APIGatewayHandler) RegisterEmployee(ctx context.Context, request 
 
 	return Response(http.StatusOK, employee), nil
 }
+*/
 
 func (handler *APIGatewayHandler) GetClient(ctx context.Context, request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
-	id, ok := request.PathParameters["id"]
+	id, ok := request.PathParameters["userId"]
 
 	if !ok {
 		return ErrResponse(http.StatusBadRequest, "missing 'id' parameter in path"), nil
 	}
 
+	// we use the username as the userId
 	client, err := handler.users.GetClient(ctx, id)
 
 	if err != nil {
@@ -67,26 +70,6 @@ func (handler *APIGatewayHandler) GetClient(ctx context.Context, request events.
 	}
 
 	return Response(http.StatusOK, client), nil
-}
-
-func (handler *APIGatewayHandler) GetEnterprise(ctx context.Context, request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
-	id, ok := request.PathParameters["id"]
-
-	if !ok {
-		return ErrResponse(http.StatusBadRequest, "missing 'id' parameter in path"), nil
-	}
-
-	enterprise, err := handler.users.GetEnterprise(ctx, id)
-
-	if err != nil {
-		return ErrResponse(http.StatusInternalServerError, err.Error()), err
-	}
-
-	if enterprise == nil {
-		return ErrResponse(http.StatusNotFound, "enterprise not found"), nil
-	}
-
-	return Response(http.StatusOK, enterprise), nil
 }
 
 func (handler *APIGatewayHandler) GetEmployee(ctx context.Context, request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
@@ -109,6 +92,27 @@ func (handler *APIGatewayHandler) GetEmployee(ctx context.Context, request event
 	return Response(http.StatusOK, employee), nil
 }
 
+/*
+func (handler *APIGatewayHandler) GetEnterprise(ctx context.Context, request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
+	id, ok := request.PathParameters["id"]
+
+	if !ok {
+		return ErrResponse(http.StatusBadRequest, "missing 'id' parameter in path"), nil
+	}
+
+	enterprise, err := handler.users.GetEnterprise(ctx, id)
+
+	if err != nil {
+		return ErrResponse(http.StatusInternalServerError, err.Error()), err
+	}
+
+	if enterprise == nil {
+		return ErrResponse(http.StatusNotFound, "enterprise not found"), nil
+	}
+
+	return Response(http.StatusOK, enterprise), nil
+}
+
 func (handler *APIGatewayHandler) GetAdministrator(ctx context.Context, request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
 	id, ok := request.PathParameters["id"]
 
@@ -128,3 +132,4 @@ func (handler *APIGatewayHandler) GetAdministrator(ctx context.Context, request 
 
 	return Response(http.StatusOK, administrator), nil
 }
+*/

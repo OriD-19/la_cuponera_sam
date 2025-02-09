@@ -9,6 +9,7 @@ import (
 	"strings"
 
 	"github.com/go-playground/validator/v10"
+	"github.com/google/uuid"
 )
 
 var (
@@ -65,24 +66,36 @@ func (c *Coupons) GetCoupon(ctx context.Context, id string) (*types.Coupon, erro
 }
 
 func (c *Coupons) PutCoupon(ctx context.Context, id *string, body []byte) (*types.Coupon, error) {
-	coupon := types.Coupon{}
+	couponRequest := types.CreateNewCouponRequest{}
 
-	if err := json.Unmarshal(body, &coupon); err != nil {
+	if err := json.Unmarshal(body, &couponRequest); err != nil {
 		return nil, fmt.Errorf("%w", ErrJsonUnmarshal)
 	}
 
 	validate := validator.New()
-
-	err := validate.Struct(coupon)
+	err := validate.Struct(couponRequest)
 
 	if err != nil {
 		return nil, fmt.Errorf("%w", err)
 	}
 
+	coupon := types.Coupon{}
+
+	// populate the newly created coupon object
+	coupon.EntityType = "coupon"
+	coupon.Title = couponRequest.Title
+	coupon.OfferDesc = couponRequest.Description
+	coupon.RegularPrice = couponRequest.RegularPrice
+	coupon.OfferPrice = couponRequest.OfferPrice
+	coupon.AvailableCoupons = couponRequest.AvailableCoupons
+	coupon.ValidUntil = couponRequest.ExpiresAt
+	coupon.OfferDesc = couponRequest.OfferDesc
+
 	if id != nil {
-		if coupon.Id != *id {
-			return nil, fmt.Errorf("%w", ErrProductIdMismatch)
-		}
+		coupon.Id = *id
+	} else {
+		// assign new UUID to the coupon
+		coupon.Id = uuid.New().String()
 	}
 
 	err = c.store.PutCoupon(ctx, coupon)

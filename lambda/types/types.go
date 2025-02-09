@@ -185,11 +185,11 @@ func CreateTokenEmployee(e Employee) string {
 
 }
 
-func (u *User) HashPassword() error {
-	hashedPassword, _ := bcrypt.GenerateFromPassword([]byte(u.Password), bcrypt.DefaultCost)
-	u.Password = string(hashedPassword)
+func HashPassword(password string) (string, error) {
+	hashedPassword, _ := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+	password = string(hashedPassword)
 
-	return nil
+	return password, nil
 }
 
 func extractTokenFromHeaders(headers map[string]string) string {

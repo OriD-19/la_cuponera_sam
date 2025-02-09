@@ -18,4 +18,7 @@ type UserStore interface {
 	GetEnterprise(context.Context, string) (Enterprise, error)
 	GetAdministrator(context.Context, string) (Administrator, error)
 	GetEmployee(context.Context, string) (Employee, error)
+
+	// TODO: Implement these methods
+	//UpdateClient(context.Context, string, Client) error
 }

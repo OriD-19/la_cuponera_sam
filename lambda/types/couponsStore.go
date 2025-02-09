@@ -15,6 +15,7 @@ type CouponStore interface {
 	GetCoupon(context.Context, string) (Coupon, error)
 	PutCoupon(context.Context, Coupon) error
 	RedeemCoupon(context.Context, string) error
-	BuyCoupon(context.Context, string, string) error
+	BuyCoupon(context.Context, string, string) (GeneratedOffer, error)
 	GetUserOffers(context.Context, string) (OfferRange, error)
+	GetGeneratedOffer(context.Context, string) (GeneratedOffer, error)
 }

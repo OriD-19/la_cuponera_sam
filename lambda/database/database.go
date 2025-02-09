@@ -223,26 +223,56 @@ func (d *DynamoDBStore) PutGeneratedOffer(c context.Context, offer types.Generat
 	return nil
 }
 
-// only clients can buy a coupon
-func (d *DynamoDBStore) GenerateCouponOffer(c context.Context, coupon types.Coupon, user types.Client) (types.GeneratedOffer, error) {
-
-	var newGenOffer types.GeneratedOffer
+func (d *DynamoDBStore) GenerateId(c context.Context, enterpriseId string) (string, error) {
+	// generate a random ID for the generated offer
 
 	// 7-digit random number for the code
 	randInt, err := rand.Int(rand.Reader, big.NewInt(9999999))
 
 	if err != nil {
-		return types.GeneratedOffer{}, fmt.Errorf("failed to generate random number, %v", err)
+		return "", fmt.Errorf("failed to generate random number, %v", err)
 	}
 
 	// get the enterprise associated with the coupon
-	enterprise, err := d.GetEnterprise(c, coupon.EnterpriseId)
+	enterprise, err := d.GetEnterprise(c, enterpriseId)
 
 	if err != nil {
-		return types.GeneratedOffer{}, fmt.Errorf("failed to get enterprise, %v", err)
+		return "", fmt.Errorf("failed to get enterprise, %v", err)
 	}
 
-	generatedId := fmt.Sprintf("%s%d", enterprise.EnterpriseCode, randInt)
+	return fmt.Sprintf("%s%d", enterprise.EnterpriseCode, randInt), nil
+
+}
+
+// only clients can buy a coupon
+func (d *DynamoDBStore) BuyCoupon(c context.Context, couponId string, userId string) (types.GeneratedOffer, error) {
+
+	coupon, err := d.GetCoupon(c, couponId)
+
+	if err != nil {
+		return types.GeneratedOffer{}, fmt.Errorf("failed to get coupon, %v", err)
+	}
+
+	// check if the coupon is still available
+	if coupon.AvailableCoupons <= 0 {
+		return types.GeneratedOffer{}, fmt.Errorf("coupon is not available")
+	}
+
+	// get the user associated with the coupon
+	user, err := d.GetClient(c, userId)
+
+	if err != nil {
+		return types.GeneratedOffer{}, fmt.Errorf("failed to get user, %v", err)
+	}
+
+	var newGenOffer types.GeneratedOffer
+
+	// generate a new ID for the generated offer
+	generatedId, err := d.GenerateId(c, coupon.EnterpriseId)
+
+	if err != nil {
+		return types.GeneratedOffer{}, fmt.Errorf("failed to generate ID, %v", err)
+	}
 
 	newGenOffer.Id = generatedId
 	newGenOffer.UserId = user.Email

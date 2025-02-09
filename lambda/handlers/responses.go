@@ -7,7 +7,7 @@ import (
 	"github.com/aws/aws-lambda-go/events"
 )
 
-func Response(code int, bodyObject interface{}) events.APIGatewayV2HTTPResponse {
+func Response(code int, bodyObject interface{}) events.APIGatewayProxyResponse {
 
 	// validate the received body
 
@@ -17,7 +17,7 @@ func Response(code int, bodyObject interface{}) events.APIGatewayV2HTTPResponse 
 		return ErrResponse(http.StatusInternalServerError, err.Error())
 	}
 
-	return events.APIGatewayV2HTTPResponse{
+	return events.APIGatewayProxyResponse{
 		StatusCode: code,
 		Headers: map[string]string{
 			"Content-Type": "application/json",
@@ -27,14 +27,14 @@ func Response(code int, bodyObject interface{}) events.APIGatewayV2HTTPResponse 
 	}
 }
 
-func ErrResponse(code int, body string) events.APIGatewayV2HTTPResponse {
+func ErrResponse(code int, body string) events.APIGatewayProxyResponse {
 	message := map[string]string{
 		"message": body,
 	}
 
 	messageBytes, _ := json.Marshal(&message)
 
-	return events.APIGatewayV2HTTPResponse{
+	return events.APIGatewayProxyResponse{
 		StatusCode: code,
 		Headers: map[string]string{
 			"Content-Type": "application/json",

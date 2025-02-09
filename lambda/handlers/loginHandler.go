@@ -17,7 +17,7 @@ type LoginRequest struct {
 	Password string `json:"password" validator:"required,email"`
 }
 
-func (handler *APIGatewayHandler) LoginClient(ctx context.Context, request events.APIGatewayV2HTTPRequest) (events.APIGatewayV2HTTPResponse, error) {
+func (handler *APIGatewayHandler) LoginClient(ctx context.Context, request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
 
 	var loginRequest LoginRequest
 
@@ -53,7 +53,7 @@ func (handler *APIGatewayHandler) LoginClient(ctx context.Context, request event
 	return Response(http.StatusOK, successMsg), nil
 }
 
-func (handler *APIGatewayHandler) LoginEmployee(ctx context.Context, request events.APIGatewayV2HTTPRequest) (events.APIGatewayV2HTTPResponse, error) {
+func (handler *APIGatewayHandler) LoginEmployee(ctx context.Context, request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
 
 	var loginRequest LoginRequest
 

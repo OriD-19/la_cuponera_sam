@@ -104,14 +104,14 @@ func (c *Coupons) RedeemCoupon(ctx context.Context, id string) error {
 	return nil
 }
 
-func (c *Coupons) BuyCoupon(ctx context.Context, couponId string, userId string) error {
-	err := c.store.BuyCoupon(ctx, couponId, userId)
+func (c *Coupons) BuyCoupon(ctx context.Context, couponId string, userId string) (*types.GeneratedOffer, error) {
+	generatedOffer, err := c.store.BuyCoupon(ctx, couponId, userId)
 
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	return nil
+	return &generatedOffer, nil
 }
 
 func (c *Coupons) GetUserOffers(ctx context.Context, id string) (types.OfferRange, error) {
@@ -122,4 +122,14 @@ func (c *Coupons) GetUserOffers(ctx context.Context, id string) (types.OfferRang
 	}
 
 	return offerRange, nil
+}
+
+func (c *Coupons) GetGeneratedOffer(ctx context.Context, id string) (*types.GeneratedOffer, error) {
+	offer, err := c.store.GetGeneratedOffer(ctx, id)
+
+	if err != nil {
+		return &types.GeneratedOffer{}, err
+	}
+
+	return &offer, nil
 }

@@ -42,7 +42,7 @@ func NewLaCuponeraSamStack(scope constructs.Construct, id string, props *LaCupon
 	couponsLambda := awslambda.NewFunction(stack, jsii.String("LaCuponeraCouponsLambda"), &awslambda.FunctionProps{
 		Runtime: awslambda.Runtime_PROVIDED_AL2023(),
 		Handler: jsii.String("main"),
-		Code:    awslambda.Code_FromAsset(jsii.String("lambda/couponsFunctions.zip"), nil),
+		Code:    awslambda.Code_FromAsset(jsii.String("lambda/functions/couponFunction/couponsFunction.zip"), nil),
 		Environment: &map[string]*string{
 			"TABLE_NAME": table.TableName(),
 		},
@@ -52,7 +52,7 @@ func NewLaCuponeraSamStack(scope constructs.Construct, id string, props *LaCupon
 	usersLambda := awslambda.NewFunction(stack, jsii.String("LaCuponeraUsersLambda"), &awslambda.FunctionProps{
 		Runtime: awslambda.Runtime_PROVIDED_AL2023(),
 		Handler: jsii.String("main"),
-		Code:    awslambda.Code_FromAsset(jsii.String("lambda/usersFunction.zip"), nil),
+		Code:    awslambda.Code_FromAsset(jsii.String("lambda/functions/userFunction/usersFunction.zip"), nil),
 		Environment: &map[string]*string{
 			"TABLE_NAME": table.TableName(),
 		},
@@ -62,7 +62,7 @@ func NewLaCuponeraSamStack(scope constructs.Construct, id string, props *LaCupon
 	loginLambda := awslambda.NewFunction(stack, jsii.String("LaCuponeraLoginLambda"), &awslambda.FunctionProps{
 		Runtime: awslambda.Runtime_PROVIDED_AL2023(),
 		Handler: jsii.String("main"),
-		Code:    awslambda.Code_FromAsset(jsii.String("lambda/loginFunction.zip"), nil),
+		Code:    awslambda.Code_FromAsset(jsii.String("lambda/functions/loginFunction/loginFunction.zip"), nil),
 		Environment: &map[string]*string{
 			"TABLE_NAME": table.TableName(),
 		},
@@ -102,8 +102,8 @@ func NewLaCuponeraSamStack(scope constructs.Construct, id string, props *LaCupon
 	couponsResource := api.Root().AddResource(jsii.String("coupons"), nil)
 	couponsResource.AddMethod(jsii.String("GET"), couponsIntegration, nil)
 
-	// POST /coupons
-	couponsResource.AddMethod(jsii.String("POST"), couponsIntegration, nil)
+	// TODO POST /coupons
+	//couponsResource.AddMethod(jsii.String("POST"), couponsIntegration, nil)
 
 	// GET /coupons/{id}
 	couponsResource.AddResource(jsii.String("{id}"), nil).
@@ -112,6 +112,12 @@ func NewLaCuponeraSamStack(scope constructs.Construct, id string, props *LaCupon
 	// PUT /coupons/{id}
 	couponsResource.GetResource(jsii.String("{id}")).
 		AddMethod(jsii.String("PUT"), couponsIntegration, nil)
+
+	// get coupons by category
+	// GET /coupons/category/{category}
+	couponsResource.AddResource(jsii.String("category"), nil).
+		AddResource(jsii.String("{category}"), nil).
+		AddMethod(jsii.String("GET"), couponsIntegration, nil)
 
 	// buy a coupon
 	// POST /coupons/{id}/buy
@@ -123,17 +129,18 @@ func NewLaCuponeraSamStack(scope constructs.Construct, id string, props *LaCupon
 
 	// since offers only work for a given user id, we can query them directly as a parameter path
 	// GET /offers/{userId}
-	offersResource := api.Root().AddResource(jsii.String("offers"), nil).
-		AddResource(jsii.String("{userId}"), nil)
-	offersResource.AddMethod(jsii.String("GET"), couponsIntegration, nil)
+	offersResource := api.Root().AddResource(jsii.String("offers"), nil)
+	offersResource.AddResource(jsii.String("{userId}"), nil).
+		AddMethod(jsii.String("GET"), couponsIntegration, nil)
 
 	// get offer details
-	// GET /offers/{userId}/{offerId}
+	// GET /offers/{offerId}
 	offersResource.AddResource(jsii.String("{offerId}"), nil).
+		AddResource(jsii.String("{userId}"), nil).
 		AddMethod(jsii.String("GET"), couponsIntegration, nil)
 
 	// redeem a coupon
-	// POST /offers/{userId}/{offerId}/redeem
+	// POST /offers/{offerId}/redeem
 	offersResource.AddResource(jsii.String("{offerId}"), nil).
 		AddResource(jsii.String("redeem"), nil).
 		AddMethod(jsii.String("POST"), couponsIntegration, nil)
@@ -168,8 +175,16 @@ func NewLaCuponeraSamStack(scope constructs.Construct, id string, props *LaCupon
 		AddMethod(jsii.String("PUT"), usersIntegration, nil)
 
 	// login resources
+	// POST /login/client
 	loginResource := api.Root().AddResource(jsii.String("login"), nil)
-	loginResource.AddMethod(jsii.String("POST"), loginIntegration, nil)
+	loginResource.
+		AddResource(jsii.String("client"), nil).
+		AddMethod(jsii.String("POST"), loginIntegration, nil)
+
+	// POST login/employee
+	loginResource.
+		AddResource(jsii.String("employee"), nil).
+		AddMethod(jsii.String("POST"), loginIntegration, nil)
 
 	return stack
 }

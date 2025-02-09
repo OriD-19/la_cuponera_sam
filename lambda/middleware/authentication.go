@@ -14,8 +14,8 @@ import (
 // middleware for validating JWT tokens and checking user permissions
 
 // basic authentication header
-func ValidateJWTMiddleware(next func(events.APIGatewayV2HTTPRequest) (events.APIGatewayV2HTTPResponse, error)) func(events.APIGatewayV2HTTPRequest) (events.APIGatewayV2HTTPResponse, error) {
-	return func(request events.APIGatewayV2HTTPRequest) (events.APIGatewayV2HTTPResponse, error) {
+func ValidateJWTMiddleware(next func(events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error)) func(events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
+	return func(request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
 		tokenString := extractTokenFromHeaders(request.Headers)
 
 		if strings.TrimSpace(tokenString) == "" {
@@ -39,8 +39,8 @@ func ValidateJWTMiddleware(next func(events.APIGatewayV2HTTPRequest) (events.API
 }
 
 // client authorization header
-func ValidateClientJWTMiddleware(next func(events.APIGatewayV2HTTPRequest) (events.APIGatewayV2HTTPResponse, error)) func(events.APIGatewayV2HTTPRequest) (events.APIGatewayV2HTTPResponse, error) {
-	return func(request events.APIGatewayV2HTTPRequest) (events.APIGatewayV2HTTPResponse, error) {
+func ValidateClientJWTMiddleware(next func(events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error)) func(events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
+	return func(request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
 		tokenString := extractTokenFromHeaders(request.Headers)
 
 		if strings.TrimSpace(tokenString) == "" {
@@ -70,8 +70,8 @@ func ValidateClientJWTMiddleware(next func(events.APIGatewayV2HTTPRequest) (even
 }
 
 // employee authorization header
-func ValidateEmployeeJWTMiddleware(next func(events.APIGatewayV2HTTPRequest) (events.APIGatewayV2HTTPResponse, error)) func(events.APIGatewayV2HTTPRequest) (events.APIGatewayV2HTTPResponse, error) {
-	return func(request events.APIGatewayV2HTTPRequest) (events.APIGatewayV2HTTPResponse, error) {
+func ValidateEmployeeJWTMiddleware(next func(events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error)) func(events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
+	return func(request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
 		tokenString := extractTokenFromHeaders(request.Headers)
 
 		if strings.TrimSpace(tokenString) == "" {

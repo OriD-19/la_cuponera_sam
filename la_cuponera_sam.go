@@ -110,11 +110,11 @@ func NewLaCuponeraSamStack(scope constructs.Construct, id string, props *LaCupon
 	//couponsResource.AddMethod(jsii.String("POST"), couponsIntegration, nil)
 
 	// GET /coupons/{id}
-	couponsResource.AddResource(jsii.String("{id}"), nil).
+	couponsResource.AddResource(jsii.String("{couponId}"), nil).
 		AddMethod(jsii.String("GET"), couponsIntegration, nil)
 
 	// PUT /coupons/{id}
-	couponsResource.GetResource(jsii.String("{id}")).
+	couponsResource.GetResource(jsii.String("{couponId}")).
 		AddMethod(jsii.String("PUT"), couponsIntegration, nil)
 
 	// get coupons by category
@@ -125,7 +125,7 @@ func NewLaCuponeraSamStack(scope constructs.Construct, id string, props *LaCupon
 
 	// buy a coupon
 	// POST /coupons/{id}/buy
-	couponsResource.GetResource(jsii.String("{id}")).
+	couponsResource.GetResource(jsii.String("{couponId}")).
 		AddResource(jsii.String("buy"), nil).
 		AddMethod(jsii.String("POST"), couponsIntegration, nil)
 

@@ -1,7 +1,9 @@
 package types
 
 import (
+	"fmt"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
@@ -19,8 +21,8 @@ type Entity struct {
 
 type User struct {
 	Entity
-	Email     string    `dynamodbav:"id" json:"email" validator:"required,email"` // email is the id
-	Username  string    `dynamodbav:"username" json:"username" validator:"required,max=100"`
+	Email     string    `dynamodbav:"email" json:"email" validator:"required,email"` // email is the id
+	Username  string    `dynamodbav:"id" json:"username" validator:"required,max=100"`
 	Password  string    `dynamodbav:"password" json:"password" validator:"required,min=8"`
 	CreatedAt time.Time `dynamodbav:"createdAt" json:"createdAt" validator:"required"`
 
@@ -162,10 +164,10 @@ func CreateTokenEmployee(e Employee) string {
 	validUntil := now.Add(time.Hour * 6).Unix()
 
 	claims := jwt.MapClaims{
-		"user":    e.Username,
-		"email":   e.Email,
-		"role":    "employee",
-		"expires": validUntil,
+		"username": e.Username,
+		"email":    e.Email,
+		"role":     "employee",
+		"expires":  validUntil,
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims, nil)
@@ -188,4 +190,66 @@ func (u *User) HashPassword() error {
 	u.Password = string(hashedPassword)
 
 	return nil
+}
+
+func extractTokenFromHeaders(headers map[string]string) string {
+	authHeader, ok := headers["Authorization"]
+
+	if !ok {
+		return ""
+	}
+
+	splitToken := strings.Split(authHeader, "Bearer ")
+
+	if len(splitToken) != 2 {
+		return ""
+	}
+
+	return splitToken[1]
+}
+
+func parseToken(tokenString string) (jwt.MapClaims, error) {
+	token, err := jwt.Parse(tokenString, func(t *jwt.Token) (interface{}, error) {
+		secret := []byte(os.Getenv("SECRET"))
+		return secret, nil
+	})
+
+	if err != nil {
+		return nil, fmt.Errorf("failed to parse JWT token: %w", err)
+	}
+
+	if !token.Valid {
+		return nil, fmt.Errorf("invalid JWT token")
+	}
+
+	// type assertion
+	claims, ok := token.Claims.(jwt.MapClaims)
+
+	if !ok {
+		return nil, fmt.Errorf("failed to parse JWT claims")
+	}
+
+	return claims, nil
+}
+
+func GetClientAuthFromHeader(headers map[string]string) (Client, error) {
+	tokenString := extractTokenFromHeaders(headers)
+
+	if tokenString == "" {
+		return Client{}, nil
+	}
+
+	claims, err := parseToken(tokenString)
+
+	if err != nil {
+		return Client{}, err
+	}
+
+	email := claims["email"].(string)
+
+	return Client{
+		User: User{
+			Email: email,
+		},
+	}, nil
 }

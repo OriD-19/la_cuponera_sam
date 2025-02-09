@@ -13,7 +13,7 @@ import (
 
 // for logging out, just delete the token from the client
 type LoginRequest struct {
-	Email    string `json:"email" validator:"required,email"`
+	Username string `json:"email" validator:"required"`
 	Password string `json:"password" validator:"required,email"`
 }
 
@@ -33,10 +33,10 @@ func (handler *APIGatewayHandler) LoginClient(ctx context.Context, request event
 	err = validate.Struct(loginRequest)
 
 	if err != nil {
-		return ErrResponse(http.StatusBadRequest, "invalid email or password"), err
+		return ErrResponse(http.StatusBadRequest, "invalid username or password"), err
 	}
 
-	client, err := handler.users.GetClient(ctx, loginRequest.Email)
+	client, err := handler.users.GetClient(ctx, loginRequest.Username)
 
 	if err != nil {
 		return ErrResponse(http.StatusNotFound, err.Error()), err
@@ -69,10 +69,10 @@ func (handler *APIGatewayHandler) LoginEmployee(ctx context.Context, request eve
 	err = validate.Struct(loginRequest)
 
 	if err != nil {
-		return ErrResponse(http.StatusBadRequest, "invalid email or password"), err
+		return ErrResponse(http.StatusBadRequest, "invalid username or password"), err
 	}
 
-	employee, err := handler.users.GetEmployee(ctx, loginRequest.Email)
+	employee, err := handler.users.GetEmployee(ctx, loginRequest.Username)
 
 	if err != nil {
 		return ErrResponse(http.StatusNotFound, err.Error()), err

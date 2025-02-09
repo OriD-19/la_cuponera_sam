@@ -181,8 +181,8 @@ func (u *Users) RegisterEmployee(ctx context.Context, body []byte) (*types.Emplo
 	return &employee, nil
 }
 
-func (u *Users) GetClient(ctx context.Context, email string) (*types.Client, error) {
-	client, err := u.store.GetClient(ctx, email)
+func (u *Users) GetClient(ctx context.Context, username string) (*types.Client, error) {
+	client, err := u.store.GetClient(ctx, username)
 
 	if err != nil {
 		return &types.Client{}, err
@@ -191,8 +191,8 @@ func (u *Users) GetClient(ctx context.Context, email string) (*types.Client, err
 	return &client, nil
 }
 
-func (u *Users) GetEnterprise(ctx context.Context, id string) (*types.Enterprise, error) {
-	enterprise, err := u.store.GetEnterprise(ctx, id)
+func (u *Users) GetEnterprise(ctx context.Context, username string) (*types.Enterprise, error) {
+	enterprise, err := u.store.GetEnterprise(ctx, username)
 
 	if err != nil {
 		return &types.Enterprise{}, err
@@ -201,8 +201,8 @@ func (u *Users) GetEnterprise(ctx context.Context, id string) (*types.Enterprise
 	return &enterprise, nil
 }
 
-func (u *Users) GetAdministrator(ctx context.Context, id string) (*types.Administrator, error) {
-	administrator, err := u.store.GetAdministrator(ctx, id)
+func (u *Users) GetAdministrator(ctx context.Context, username string) (*types.Administrator, error) {
+	administrator, err := u.store.GetAdministrator(ctx, username)
 
 	if err != nil {
 		return &types.Administrator{}, err
@@ -211,8 +211,8 @@ func (u *Users) GetAdministrator(ctx context.Context, id string) (*types.Adminis
 	return &administrator, nil
 }
 
-func (u *Users) GetEmployee(ctx context.Context, id string) (*types.Employee, error) {
-	employee, err := u.store.GetEmployee(ctx, id)
+func (u *Users) GetEmployee(ctx context.Context, username string) (*types.Employee, error) {
+	employee, err := u.store.GetEmployee(ctx, username)
 
 	if err != nil {
 		return &types.Employee{}, err

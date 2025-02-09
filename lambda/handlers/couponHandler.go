@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"OriD19/webdev2/domain"
+	"OriD19/webdev2/types"
 	"context"
 	"errors"
 	"net/http"
@@ -23,7 +24,7 @@ func (handler *APIGatewayHandler) GetAllCouponsHandler(ctx context.Context, requ
 }
 
 func (handler *APIGatewayHandler) GetCouponHandler(ctx context.Context, request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
-	id, ok := request.PathParameters["id"]
+	id, ok := request.PathParameters["couponId"]
 
 	if !ok {
 		return ErrResponse(http.StatusBadRequest, "missing 'id' parameter in path"), nil
@@ -96,18 +97,16 @@ func (handler *APIGatewayHandler) RedeemCouponHandler(ctx context.Context, reque
 
 // we can call this handler with a POST request to /coupons/{couponId}/buy/{userId}
 func (handler *APIGatewayHandler) BuyCouponHandler(ctx context.Context, request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
-	couponId, ok := request.PathParameters["id"]
+	couponId, ok := request.PathParameters["couponId"]
 
 	if !ok {
 		return ErrResponse(http.StatusBadRequest, "missing 'couponId' parameter in path"), nil
 	}
-	userId, ok := request.PathParameters["userId"]
 
-	if !ok {
-		return ErrResponse(http.StatusBadRequest, "missing 'userId' parameter in path"), nil
-	}
+	user, err := types.GetClientAuthFromHeader(request.Headers)
 
-	generatedOffer, err := handler.coupons.BuyCoupon(ctx, couponId, userId)
+	// remember: we're using the username as the user id
+	generatedOffer, err := handler.coupons.BuyCoupon(ctx, couponId, user.Username)
 
 	if err != nil {
 		return ErrResponse(http.StatusInternalServerError, err.Error()), err

@@ -483,8 +483,8 @@ func (d *DynamoDBStore) RegisterEmployee(c context.Context, employee types.Emplo
 	return nil
 }
 
-// we're using an email as the ID field inside of the database to make login easier
-func (d *DynamoDBStore) GetClient(c context.Context, email string) (types.Client, error) {
+// we're using an username as the ID field inside of the database to make login easier
+func (d *DynamoDBStore) GetClient(c context.Context, username string) (types.Client, error) {
 	// query a single client with the GetItem API. Better resource (RCU) efficiency
 	input := &dynamodb.GetItemInput{
 		TableName: &d.tableName,
@@ -493,7 +493,7 @@ func (d *DynamoDBStore) GetClient(c context.Context, email string) (types.Client
 				Value: "client",
 			},
 			"id": &ddbtypes.AttributeValueMemberS{
-				Value: email,
+				Value: username,
 			},
 		},
 	}

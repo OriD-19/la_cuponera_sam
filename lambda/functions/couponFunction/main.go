@@ -34,9 +34,9 @@ func main() {
 			}
 		case "/coupons/category/{category}":
 			return handler.GetAllCouponsFromCategoryHandler(ctx, request)
-		case "/coupons/{id}":
+		case "/coupons/{couponId}":
 			return handler.GetCouponHandler(ctx, request)
-		case "/coupons/buy":
+		case "/coupons/{couponId}/buy":
 			// protected route: only clients can buy coupons
 			return middleware.ValidateClientJWTMiddleware(handler.BuyCouponHandler)(ctx, request)
 		case "/offers/allFromUser/{userId}":

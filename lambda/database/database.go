@@ -504,6 +504,10 @@ func (d *DynamoDBStore) GetClient(c context.Context, username string) (types.Cli
 		return types.Client{}, err
 	}
 
+	if len(result.Item) == 0 {
+		return types.Client{}, fmt.Errorf("client not found")
+	}
+
 	var client types.Client
 	err = attributevalue.UnmarshalMap(result.Item, &client)
 

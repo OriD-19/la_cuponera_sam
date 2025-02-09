@@ -2,7 +2,9 @@ package main
 
 import (
 	"github.com/aws/aws-cdk-go/awscdk/v2"
-	// "github.com/aws/aws-cdk-go/awscdk/v2/awssqs"
+	"github.com/aws/aws-cdk-go/awscdk/v2/awsapigateway"
+	"github.com/aws/aws-cdk-go/awscdk/v2/awsdynamodb"
+	"github.com/aws/aws-cdk-go/awscdk/v2/awslambda"
 	"github.com/aws/constructs-go/constructs/v10"
 	"github.com/aws/jsii-runtime-go"
 )
@@ -18,12 +20,156 @@ func NewLaCuponeraSamStack(scope constructs.Construct, id string, props *LaCupon
 	}
 	stack := awscdk.NewStack(scope, &id, &sprops)
 
-	// The code that defines your stack goes here
+	table := awsdynamodb.NewTable(stack, jsii.String("LaCuponeraSamTable"), &awsdynamodb.TableProps{
+		PartitionKey: &awsdynamodb.Attribute{
+			Name: jsii.String("entityType"),
+			Type: awsdynamodb.AttributeType_STRING,
+		},
+		SortKey: &awsdynamodb.Attribute{
+			Name: jsii.String("id"),
+			Type: awsdynamodb.AttributeType_STRING,
+		},
+		TableName:     jsii.String("LaCuponeraTable"),
+		RemovalPolicy: awscdk.RemovalPolicy_DESTROY,
+	})
 
-	// example resource
-	// queue := awssqs.NewQueue(stack, jsii.String("LaCuponeraSamQueue"), &awssqs.QueueProps{
-	// 	VisibilityTimeout: awscdk.Duration_Seconds(jsii.Number(300)),
-	// })
+	// generate three lamdbas, one for each type of functionality in the API:
+	// - Managing coupons and offers
+	// - Managing users
+	// - Managing the login system
+
+	// Coupons and offers
+	couponsLambda := awslambda.NewFunction(stack, jsii.String("LaCuponeraCouponsLambda"), &awslambda.FunctionProps{
+		Runtime: awslambda.Runtime_PROVIDED_AL2023(),
+		Handler: jsii.String("main"),
+		Code:    awslambda.Code_FromAsset(jsii.String("lambda/couponsFunctions.zip"), nil),
+		Environment: &map[string]*string{
+			"TABLE_NAME": table.TableName(),
+		},
+	})
+
+	// Users
+	usersLambda := awslambda.NewFunction(stack, jsii.String("LaCuponeraUsersLambda"), &awslambda.FunctionProps{
+		Runtime: awslambda.Runtime_PROVIDED_AL2023(),
+		Handler: jsii.String("main"),
+		Code:    awslambda.Code_FromAsset(jsii.String("lambda/usersFunction.zip"), nil),
+		Environment: &map[string]*string{
+			"TABLE_NAME": table.TableName(),
+		},
+	})
+
+	// Login
+	loginLambda := awslambda.NewFunction(stack, jsii.String("LaCuponeraLoginLambda"), &awslambda.FunctionProps{
+		Runtime: awslambda.Runtime_PROVIDED_AL2023(),
+		Handler: jsii.String("main"),
+		Code:    awslambda.Code_FromAsset(jsii.String("lambda/loginFunction.zip"), nil),
+		Environment: &map[string]*string{
+			"TABLE_NAME": table.TableName(),
+		},
+	})
+
+	table.GrantReadWriteData(couponsLambda)
+	table.GrantReadWriteData(usersLambda)
+	table.GrantReadWriteData(loginLambda)
+
+	// Finally, create the integration with the API Gateway
+
+	api := awsapigateway.NewRestApi(stack, jsii.String("LaCuponeraApi"), &awsapigateway.RestApiProps{
+		DefaultCorsPreflightOptions: &awsapigateway.CorsOptions{
+			AllowOrigins: jsii.Strings("*"),
+			AllowMethods: jsii.Strings("GET", "POST", "PUT", "DELETE"),
+			// remember modifying the headers if necessary
+			AllowHeaders: jsii.Strings("Content-Type", "Authorization"),
+		},
+		DeployOptions: &awsapigateway.StageOptions{
+			LoggingLevel: awsapigateway.MethodLoggingLevel_INFO,
+			StageName:    jsii.String("v1"),
+		},
+		RestApiName: jsii.String("LaCuponeraApi"),
+	})
+
+	// Create integrations with the lambda functions
+	couponsIntegration := awsapigateway.NewLambdaIntegration(couponsLambda, nil)
+	usersIntegration := awsapigateway.NewLambdaIntegration(usersLambda, nil)
+	loginIntegration := awsapigateway.NewLambdaIntegration(loginLambda, nil)
+
+	// **********************
+	// CREATE THE RESOURCES
+	// **********************
+
+	// Create the resources
+	// GET /coupons
+	couponsResource := api.Root().AddResource(jsii.String("coupons"), nil)
+	couponsResource.AddMethod(jsii.String("GET"), couponsIntegration, nil)
+
+	// POST /coupons
+	couponsResource.AddMethod(jsii.String("POST"), couponsIntegration, nil)
+
+	// GET /coupons/{id}
+	couponsResource.AddResource(jsii.String("{id}"), nil).
+		AddMethod(jsii.String("GET"), couponsIntegration, nil)
+
+	// PUT /coupons/{id}
+	couponsResource.GetResource(jsii.String("{id}")).
+		AddMethod(jsii.String("PUT"), couponsIntegration, nil)
+
+	// buy a coupon
+	// POST /coupons/{id}/buy
+	couponsResource.GetResource(jsii.String("{id}")).
+		AddResource(jsii.String("buy"), nil).
+		AddMethod(jsii.String("POST"), couponsIntegration, nil)
+
+	// Offers resources
+
+	// since offers only work for a given user id, we can query them directly as a parameter path
+	// GET /offers/{userId}
+	offersResource := api.Root().AddResource(jsii.String("offers"), nil).
+		AddResource(jsii.String("{userId}"), nil)
+	offersResource.AddMethod(jsii.String("GET"), couponsIntegration, nil)
+
+	// get offer details
+	// GET /offers/{userId}/{offerId}
+	offersResource.AddResource(jsii.String("{offerId}"), nil).
+		AddMethod(jsii.String("GET"), couponsIntegration, nil)
+
+	// redeem a coupon
+	// POST /offers/{userId}/{offerId}/redeem
+	offersResource.AddResource(jsii.String("{offerId}"), nil).
+		AddResource(jsii.String("redeem"), nil).
+		AddMethod(jsii.String("POST"), couponsIntegration, nil)
+
+	// Users resources
+
+	// GET /users
+	usersResource := api.Root().AddResource(jsii.String("users"), nil)
+	usersResource.AddMethod(jsii.String("GET"), usersIntegration, nil)
+
+	// register a new user of type client
+	// POST /users/client
+	usersResource.AddResource(jsii.String("client"), nil).
+		AddMethod(jsii.String("POST"), usersIntegration, nil)
+
+	// GET /users/{id}
+	usersResource.AddResource(jsii.String("{id}"), nil).
+		AddMethod(jsii.String("GET"), usersIntegration, nil)
+
+	// view profile for client
+	// GET /users/{id}/profile
+	usersResource.
+		AddResource(jsii.String("{id}"), nil).
+		AddResource(jsii.String("profile"), nil).
+		AddMethod(jsii.String("GET"), usersIntegration, nil)
+
+	// update profile for client
+	// PUT /users/{id}/profile
+	usersResource.
+		AddResource(jsii.String("{id}"), nil).
+		AddResource(jsii.String("profile"), nil).
+		AddMethod(jsii.String("PUT"), usersIntegration, nil)
+
+	// login resources
+	loginResource := api.Root().AddResource(jsii.String("login"), nil)
+	loginResource.AddMethod(jsii.String("POST"), loginIntegration, nil)
 
 	return stack
 }

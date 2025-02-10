@@ -1,12 +1,25 @@
-# Welcome to your CDK Go project!
+# La Cuponera - AWS SAM Architecture
 
-This is a blank project for CDK development with Go.
+Serverless Architecture Modeol for La Cuponera, a fictional enterprise for managing coupons and discounts.
+This whole project is meant to be deployed and integrated into the AWS ApiGateway service, alongside with 
+AWS Lambda for functionality computing and DynamoDB for entity storage.
 
-The `cdk.json` file tells the CDK toolkit how to execute your app.
+## CDK Usage
 
-## Useful commands
+For deploying the proyect, simply compile the programs inside `lambda/functions/*` and zip them into a 
+.zip file. This generates the asset for the Lambda function.
+The whole infrastructure is defined using the AWS CDK for Go, just for convenience in the deployment.
 
- * `cdk deploy`      deploy this stack to your default AWS account/region
- * `cdk diff`        compare deployed stack with current state
- * `cdk synth`       emits the synthesized CloudFormation template
- * `go test`         run unit tests
+## Endpoints
+
+For a full list of endpoints, refer to the AWS ApiGateway documentation. The hierarchy looks something like 
+the following:
+
+![Resource Hierarchy displayed in the AWS ApiGateway panel](./resource-hierarchy.PNG)
+
+### Requisites
+
+For building this project, the following programs and their specific versions were used:
+- Go (1.23.6)
+- AWS CDK (2.178.1)
+- Operating System: Windows (Linux for Lambda binaries)

@@ -274,6 +274,7 @@ func (d *DynamoDBStore) BuyCoupon(c context.Context, couponId string, userId str
 		return types.GeneratedOffer{}, fmt.Errorf("failed to generate ID, %v", err)
 	}
 
+	newGenOffer.EntityType = "generatedOffer"
 	newGenOffer.Id = generatedId
 	newGenOffer.UserId = user.Email
 	newGenOffer.CouponId = coupon.Id

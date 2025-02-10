@@ -17,7 +17,7 @@ func (handler *APIGatewayHandler) RegisterClient(ctx context.Context, request ev
 	if errors.Is(err, domain.ErrJsonUnmarshal) {
 		return ErrResponse(http.StatusBadRequest, "failed to parse client from request body"), err
 	} else if err != nil {
-		return ErrResponse(http.StatusInternalServerError, err.Error()), err
+		return ErrResponse(http.StatusBadRequest, "username already taken"), err
 	}
 
 	return Response(http.StatusOK, client), nil

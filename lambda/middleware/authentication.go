@@ -16,7 +16,7 @@ import (
 // middleware for validating JWT tokens and checking user permissions
 
 // basic authentication header
-func ValidateJWTMiddleware(next func(events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error)) func(events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
+func ValidateJWTMiddleware(ctx context.Context, next func(events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error)) func(events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
 	return func(request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
 		tokenString := extractTokenFromHeaders(request.Headers)
 
@@ -41,7 +41,7 @@ func ValidateJWTMiddleware(next func(events.APIGatewayProxyRequest) (events.APIG
 }
 
 // client authorization header
-func ValidateClientJWTMiddleware(next func(context.Context, events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error)) func(context.Context, events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
+func ValidateClientJWTMiddleware(ctx context.Context, next func(context.Context, events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error)) func(context.Context, events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
 	return func(c context.Context, request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
 		tokenString := extractTokenFromHeaders(request.Headers)
 

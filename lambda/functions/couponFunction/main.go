@@ -25,41 +25,86 @@ func main() {
 	handler := handlers.NewAPIGatewayHandler(couponDomain, usersDomain)
 
 	lambda.Start(func(ctx context.Context, request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
-		switch request.Path {
+		switch request.Resource {
 		case "/coupons":
 			switch request.HTTPMethod {
 			case "GET":
 				return handler.GetAllCouponsHandler(ctx, request)
-				// TODO add POST method for administrator to upload coupons
 			case "POST":
-				// TODO: protect this route. For convenience, is open for now
+				// TODO add POST method for administrator to upload coupons
 				return handler.PutCouponHandler(ctx, request)
+			default:
+				return events.APIGatewayProxyResponse{
+					StatusCode: 404,
+					Body:       request.Path + " " + request.Resource + ": Not found",
+				}, nil
 			}
 		case "/coupons/category/{category}":
-			return handler.GetAllCouponsFromCategoryHandler(ctx, request)
+			switch request.HTTPMethod {
+			case "GET":
+				return handler.GetAllCouponsFromCategoryHandler(ctx, request)
+			default:
+				return events.APIGatewayProxyResponse{
+					StatusCode: 404,
+					Body:       request.Path + " " + request.Resource + ": Not found",
+				}, nil
+			}
 		case "/coupons/{couponId}":
-			return handler.GetCouponHandler(ctx, request)
+			switch request.HTTPMethod {
+			case "GET":
+				return handler.GetCouponHandler(ctx, request)
+			default:
+				return events.APIGatewayProxyResponse{
+					StatusCode: 404,
+					Body:       request.Path + " " + request.Resource + ": Not found",
+				}, nil
+			}
 		case "/coupons/{couponId}/buy":
-			// protected route: only clients can buy coupons
-			return middleware.ValidateClientJWTMiddleware(handler.BuyCouponHandler)(ctx, request)
+			switch request.HTTPMethod {
+			case "POST":
+				return middleware.ValidateClientJWTMiddleware(ctx, handler.BuyCouponHandler)(ctx, request)
+			default:
+				return events.APIGatewayProxyResponse{
+					StatusCode: 404,
+					Body:       request.Path + " " + request.Resource + ": Not found",
+				}, nil
+			}
 		case "/offers/allFromUser/{userId}":
-			return middleware.ValidateClientJWTMiddleware(handler.GetUserOffersHandler)(ctx, request)
+			switch request.HTTPMethod {
+			case "GET":
+				return middleware.ValidateClientJWTMiddleware(ctx, handler.GetUserOffersHandler)(ctx, request)
 			// TODO add POST method for administrator to upload offers
+			default:
+				return events.APIGatewayProxyResponse{
+					StatusCode: 404,
+					Body:       request.Path + " " + request.Resource + ": Not found",
+				}, nil
+			}
 		case "/offers/{offerId}":
-			return middleware.ValidateClientJWTMiddleware(handler.GetUserOfferHandler)(ctx, request)
+			switch request.HTTPMethod {
+			case "GET":
+				return middleware.ValidateClientJWTMiddleware(ctx, handler.GetUserOfferHandler)(ctx, request)
+			default:
+				return events.APIGatewayProxyResponse{
+					StatusCode: 404,
+					Body:       request.Path + " " + request.Resource + ": Not found",
+				}, nil
+			}
 		case "/offers/{offerId}/redeem":
-			// only employees can redeem offers
-			return middleware.ValidateEmployeeJWTMiddleware(handler.RedeemCouponHandler)(ctx, request)
+			switch request.HTTPMethod {
+			case "POST":
+				return middleware.ValidateEmployeeJWTMiddleware(handler.RedeemCouponHandler)(ctx, request)
+			default:
+				return events.APIGatewayProxyResponse{
+					StatusCode: 404,
+					Body:       request.Path + " " + request.Resource + ": Not found",
+				}, nil
+			}
 		default:
 			return events.APIGatewayProxyResponse{
 				StatusCode: 404,
-				Body:       "Not found",
+				Body:       request.Path + " " + request.Resource + ": Not found",
 			}, nil
 		}
-
-		return events.APIGatewayProxyResponse{
-			StatusCode: 500,
-			Body:       "Internal server error",
-		}, nil
 	})
 }

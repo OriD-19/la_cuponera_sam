@@ -7,6 +7,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"time"
 
 	"github.com/go-playground/validator/v10"
 )
@@ -38,10 +39,10 @@ func (u *Users) RegisterClient(ctx context.Context, body []byte) (*types.Client,
 	}
 
 	// check if email is not taken
-	_, err = u.store.GetClient(ctx, clientRegisterRequest.Email)
+	_, err = u.store.GetClient(ctx, clientRegisterRequest.Username)
 
 	if err == nil {
-		return &types.Client{}, fmt.Errorf("email %s is already taken", clientRegisterRequest.Email)
+		return &types.Client{}, fmt.Errorf("username %s is already taken", clientRegisterRequest.Username)
 	}
 
 	// hash password before storing the user
@@ -53,8 +54,10 @@ func (u *Users) RegisterClient(ctx context.Context, body []byte) (*types.Client,
 
 	// populate the newly created user
 	client := types.Client{}
+	client.EntityType = "client"
 	client.Email = clientRegisterRequest.Email
 	client.Username = clientRegisterRequest.Username
+	client.CreatedAt = time.Now()
 	client.FirstName = clientRegisterRequest.FirstName
 	client.Password = hashedPassword
 	client.LastName = clientRegisterRequest.LastName
@@ -102,6 +105,7 @@ func (u *Users) RegisterEmployee(ctx context.Context, body []byte) (*types.Emplo
 	}
 
 	employee := types.Employee{}
+	employee.EntityType = "employee"
 	employee.Email = employeeRegisterRequest.Email
 	employee.Username = employeeRegisterRequest.Username
 	employee.FirstName = employeeRegisterRequest.FirstName

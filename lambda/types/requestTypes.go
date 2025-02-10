@@ -25,15 +25,14 @@ type RegisterEmployeeRequest struct {
 
 type CreateNewCouponRequest struct {
 	Title            string    `json:"title" validate:"required"`
-	Description      string    `json:"description" validate:"required"`
 	RegularPrice     float32   `json:"regularPrice" validate:"required,gte=0"`
-	OfferPrice       float32   `json:"discount" validate:"required,gte=0"`
+	OfferPrice       float32   `json:"offerPrice" validate:"required,gte=0"`
 	AvailableCoupons int       `json:"availableCoupons" validate:"required,gte=1"`
 	ExpiresAt        time.Time `json:"expiresAt" validate:"required,gt"`
 	OfferDesc        string    `json:"offerDesc" validate:"required"`
 }
 
 type LoginRequest struct {
-	Username string `json:"email" validator:"required"`
+	Username string `json:"username" validator:"required"`
 	Password string `json:"password" validator:"required"`
 }

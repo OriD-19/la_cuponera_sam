@@ -108,7 +108,7 @@ func NewLaCuponeraSamStack(scope constructs.Construct, id string, props *LaCupon
 	couponsResource.AddMethod(jsii.String("GET"), couponsIntegration, nil)
 
 	// TODO POST /coupons
-	//couponsResource.AddMethod(jsii.String("POST"), couponsIntegration, nil)
+	couponsResource.AddMethod(jsii.String("POST"), couponsIntegration, nil)
 
 	// GET /coupons/{id}
 	couponsResource.AddResource(jsii.String("{couponId}"), nil).

@@ -24,15 +24,15 @@ func main() {
 	handler := handlers.NewAPIGatewayHandler(couponDomain, usersDomain)
 
 	lambda.Start(func(ctx context.Context, request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
-		switch request.Path {
+		switch request.Resource {
 		case "/login/client":
 			switch request.HTTPMethod {
 			case "POST":
 				return handler.LoginClient(ctx, request)
 			default:
 				return events.APIGatewayProxyResponse{
-					StatusCode: 405,
-					Body:       "Method not allowed",
+					StatusCode: 404,
+					Body:       request.Path + " " + request.Resource + ": Not found",
 				}, nil
 			}
 		case "/login/employee":
@@ -41,15 +41,15 @@ func main() {
 				return handler.LoginEmployee(ctx, request)
 			default:
 				return events.APIGatewayProxyResponse{
-					StatusCode: 405,
-					Body:       "Method not allowed",
+					StatusCode: 404,
+					Body:       request.Path + " " + request.Resource + ": Not found",
 				}, nil
 			}
+		default:
+			return events.APIGatewayProxyResponse{
+				StatusCode: 404,
+				Body:       request.Path + " " + request.Resource + ": Not found",
+			}, nil
 		}
-
-		return events.APIGatewayProxyResponse{
-			StatusCode: 500,
-			Body:       "Internal server error",
-		}, nil
 	})
 }

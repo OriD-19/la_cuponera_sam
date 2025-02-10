@@ -84,7 +84,6 @@ func (c *Coupons) PutCoupon(ctx context.Context, id *string, body []byte) (*type
 	// populate the newly created coupon object
 	coupon.EntityType = "coupon"
 	coupon.Title = couponRequest.Title
-	coupon.OfferDesc = couponRequest.Description
 	coupon.RegularPrice = couponRequest.RegularPrice
 	coupon.OfferPrice = couponRequest.OfferPrice
 	coupon.AvailableCoupons = couponRequest.AvailableCoupons

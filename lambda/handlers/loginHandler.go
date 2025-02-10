@@ -43,10 +43,11 @@ func (handler *APIGatewayHandler) LoginClient(ctx context.Context, request event
 	}
 
 	token := types.CreateTokenClient(*client)
-	successMsg := fmt.Sprintf(`{"access_token": "%s"}`, token)
 
 	// create a new JWT
-	return Response(http.StatusOK, successMsg), nil
+	return Response(http.StatusOK, map[string]string{
+		"access_token": token,
+	}), nil
 }
 
 func (handler *APIGatewayHandler) LoginEmployee(ctx context.Context, request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {

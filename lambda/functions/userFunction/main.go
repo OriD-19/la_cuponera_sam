@@ -24,20 +24,32 @@ func main() {
 	handler := handlers.NewAPIGatewayHandler(couponDomain, usersDomain)
 
 	lambda.Start(func(ctx context.Context, request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
-		switch request.Path {
+		switch request.Resource {
 		case "/users/{userId}/profile":
 			switch request.HTTPMethod {
 			case "GET":
 				return handler.GetClient(ctx, request)
-				// TODO: Implement PUT/PATCH methods for updating user profile
+			default:
+				return events.APIGatewayProxyResponse{
+					StatusCode: 404,
+					Body:       request.Path + " " + request.Resource + ": Not found",
+				}, nil
 			}
 		case "/users/client/register":
-			return handler.RegisterClient(ctx, request)
+			switch request.HTTPMethod {
+			case "POST":
+				return handler.RegisterClient(ctx, request)
+			default:
+				return events.APIGatewayProxyResponse{
+					StatusCode: 404,
+					Body:       request.Path + " " + request.Resource + ": Not found",
+				}, nil
+			}
+		default:
+			return events.APIGatewayProxyResponse{
+				StatusCode: 404,
+				Body:       request.Path + " " + request.Resource + ": Not found",
+			}, nil
 		}
-
-		return events.APIGatewayProxyResponse{
-			StatusCode: 500,
-			Body:       "Internal server error",
-		}, nil
 	})
 }

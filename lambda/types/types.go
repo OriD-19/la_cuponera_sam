@@ -128,10 +128,10 @@ func CreateTokenClient(c Client) string {
 	validUntil := now.Add(time.Hour * 6).Unix()
 
 	claims := jwt.MapClaims{
-		"user":    c.Username,
-		"email":   c.Email,
-		"role":    "client",
-		"expires": validUntil,
+		"username": c.Username,
+		"email":    c.Email,
+		"role":     "client",
+		"expires":  validUntil,
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims, nil)
@@ -237,11 +237,11 @@ func GetClientAuthFromHeader(headers map[string]string) (Client, error) {
 		return Client{}, err
 	}
 
-	email := claims["email"].(string)
+	username := claims["username"].(string)
 
 	return Client{
 		User: User{
-			Email: email,
+			Username: username,
 		},
 	}, nil
 }

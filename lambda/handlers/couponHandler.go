@@ -61,18 +61,27 @@ func (handler *APIGatewayHandler) GetAllCouponsFromCategoryHandler(ctx context.C
 
 func (handler *APIGatewayHandler) PutCouponHandler(ctx context.Context, request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
 	id := request.PathParameters["id"]
+	var couponId *string
 
 	if strings.TrimSpace(request.Body) == "" {
 		return ErrResponse(http.StatusBadRequest, "missing request body"), nil
 	}
 
-	coupon, err := handler.coupons.PutCoupon(ctx, &id, []byte(request.Body))
+	if id == "" {
+		couponId = nil
+	} else {
+		couponId = &id
+	}
+
+	coupon, err := handler.coupons.PutCoupon(ctx, couponId, []byte(request.Body))
 
 	if err != nil {
 		if errors.Is(err, domain.ErrJsonUnmarshal) {
 			return ErrResponse(http.StatusBadRequest, err.Error()), err
 		} else if errors.Is(err, domain.ErrProductIdMismatch) {
 			return ErrResponse(http.StatusBadRequest, err.Error()), err
+		} else {
+			return ErrResponse(http.StatusInternalServerError, err.Error()), err
 		}
 	}
 
@@ -104,6 +113,10 @@ func (handler *APIGatewayHandler) BuyCouponHandler(ctx context.Context, request 
 	}
 
 	user, err := types.GetClientAuthFromHeader(request.Headers)
+
+	if err != nil {
+		return ErrResponse(http.StatusUnauthorized, err.Error()), err
+	}
 
 	// remember: we're using the username as the user id
 	generatedOffer, err := handler.coupons.BuyCoupon(ctx, couponId, user.Username)

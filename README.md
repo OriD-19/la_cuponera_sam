@@ -23,3 +23,9 @@ For building this project, the following programs and their specific versions we
 - Go (1.23.6)
 - AWS CDK (2.178.1)
 - Operating System: Windows (Linux for Lambda binaries)
+
+### TODOS
+[x] Protect the route for querying all user's offers
+[ ] Coupon category system, for easy querying
+[ ] Fix the category system: include both the enterprise ID and the coupon category in the same entity
+[x] More descriptive error code when a user does not exist

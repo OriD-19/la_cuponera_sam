@@ -133,10 +133,9 @@ func NewLaCuponeraSamStack(scope constructs.Construct, id string, props *LaCupon
 	// Offers resources
 
 	// since offers only work for a given user id, we can query them directly as a parameter path
-	// GET /offers/allFromUser/{userId}
+	// GET /offers/allFromUser/
 	offersResource := api.Root().AddResource(jsii.String("offers"), nil)
 	offersResource.AddResource(jsii.String("allFromUser"), nil).
-		AddResource(jsii.String("{userId}"), nil).
 		AddMethod(jsii.String("GET"), couponsIntegration, nil)
 
 	// get offer details

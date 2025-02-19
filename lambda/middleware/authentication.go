@@ -16,27 +16,27 @@ import (
 // middleware for validating JWT tokens and checking user permissions
 
 // basic authentication header
-func ValidateJWTMiddleware(ctx context.Context, next func(events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error)) func(events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
-	return func(request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
+func ValidateJWTMiddleware(ctx context.Context, next func(context.Context, events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error)) func(context.Context, events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
+	return func(ctx context.Context, request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
 		tokenString := extractTokenFromHeaders(request.Headers)
 
 		if strings.TrimSpace(tokenString) == "" {
-			return handlers.Response(401, "missing JWT token"), nil
+			return handlers.ErrResponse(401, "missing JWT token"), nil
 		}
 
 		claims, err := parseToken(tokenString)
 
 		if err != nil {
-			return handlers.Response(http.StatusUnauthorized, err.Error()), nil
+			return handlers.ErrResponse(http.StatusUnauthorized, err.Error()), nil
 		}
 
 		expires := int64(claims["expires"].(float64))
 
 		if time.Now().Unix() > expires {
-			return handlers.Response(http.StatusUnauthorized, "JWT token expired"), nil
+			return handlers.ErrResponse(http.StatusUnauthorized, "JWT token expired"), nil
 		}
 
-		return next(request)
+		return next(ctx, request)
 	}
 }
 
@@ -46,25 +46,25 @@ func ValidateClientJWTMiddleware(ctx context.Context, next func(context.Context,
 		tokenString := extractTokenFromHeaders(request.Headers)
 
 		if strings.TrimSpace(tokenString) == "" {
-			return handlers.Response(401, "missing JWT token"), nil
+			return handlers.ErrResponse(401, "missing JWT token"), nil
 		}
 
 		claims, err := parseToken(tokenString)
 
 		if err != nil {
-			return handlers.Response(http.StatusUnauthorized, err.Error()), nil
+			return handlers.ErrResponse(http.StatusUnauthorized, err.Error()), nil
 		}
 
 		expires := int64(claims["expires"].(float64))
 
 		if time.Now().Unix() > expires {
-			return handlers.Response(http.StatusUnauthorized, "JWT token expired"), nil
+			return handlers.ErrResponse(http.StatusUnauthorized, "JWT token expired"), nil
 		}
 
 		role := claims["role"].(string)
 
 		if role != "client" {
-			return handlers.Response(http.StatusUnauthorized, "client role required"), nil
+			return handlers.ErrResponse(http.StatusUnauthorized, "client role required"), nil
 		}
 
 		return next(c, request)
@@ -77,25 +77,25 @@ func ValidateEmployeeJWTMiddleware(next func(context.Context, events.APIGatewayP
 		tokenString := extractTokenFromHeaders(request.Headers)
 
 		if strings.TrimSpace(tokenString) == "" {
-			return handlers.Response(401, "missing JWT token"), nil
+			return handlers.ErrResponse(401, "missing JWT token"), nil
 		}
 
 		claims, err := parseToken(tokenString)
 
 		if err != nil {
-			return handlers.Response(http.StatusUnauthorized, err.Error()), nil
+			return handlers.ErrResponse(http.StatusUnauthorized, err.Error()), nil
 		}
 
 		expires := int64(claims["expires"].(float64))
 
 		if time.Now().Unix() > expires {
-			return handlers.Response(http.StatusUnauthorized, "JWT token expired"), nil
+			return handlers.ErrResponse(http.StatusUnauthorized, "JWT token expired"), nil
 		}
 
 		role := claims["role"].(string)
 
 		if role != "employee" {
-			return handlers.Response(http.StatusUnauthorized, "employee role required"), nil
+			return handlers.ErrResponse(http.StatusUnauthorized, "employee role required"), nil
 		}
 
 		return next(c, request)

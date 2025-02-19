@@ -69,7 +69,7 @@ func main() {
 					Body:       request.Path + " " + request.Resource + ": Not found",
 				}, nil
 			}
-		case "/offers/allFromUser/{userId}":
+		case "/offers/allFromUser":
 			switch request.HTTPMethod {
 			case "GET":
 				return middleware.ValidateClientJWTMiddleware(ctx, handler.GetUserOffersHandler)(ctx, request)
@@ -83,7 +83,9 @@ func main() {
 		case "/offers/{offerId}":
 			switch request.HTTPMethod {
 			case "GET":
-				return middleware.ValidateClientJWTMiddleware(ctx, handler.GetUserOfferHandler)(ctx, request)
+				// we just need to know whether or not the user is authenticated to see this offer
+				// so, either an employee or a user can see an offer
+				return middleware.ValidateJWTMiddleware(ctx, handler.GetUserOfferHandler)(ctx, request)
 			default:
 				return events.APIGatewayProxyResponse{
 					StatusCode: 404,

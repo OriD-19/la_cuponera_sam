@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"math/rand/v2"
 	"strings"
 	"time"
 
@@ -17,6 +18,14 @@ var (
 	ErrJsonUnmarshal     = errors.New("failed to parse product from request body")
 	ErrProductIdMismatch = errors.New("product ID in path does not match product ID in body")
 )
+
+/*
+!IMPORTANT: THESE IS FOR THE FIRST PART OF THE PROJECT ONLY
+Enterprises are defined manually inside the database, and the mechanism (to avoid making the whole system at once)
+will be to define the Enterprises IDs inside this array, and pick them randomly. So, who cares.
+The contents of the coupons will not be that coherent, but is the most efficient way to test everything
+*/
+var EnterprisesIds = [5]string{"ATONIOSFOODS", "BELLEZASALON", "MARCOSRESTAURANTES", "CASASPA", "ALMACENESCORAZON"}
 
 // implementation of the Coupons store for CRUD operations over coupons
 
@@ -66,7 +75,7 @@ func (c *Coupons) GetCoupon(ctx context.Context, id string) (*types.Coupon, erro
 	return &coupon, nil
 }
 
-func (c *Coupons) PutCoupon(ctx context.Context, id *string, body []byte) (*types.Coupon, error) {
+func (c *Coupons) PutCoupon(ctx context.Context, id *string, body []byte, userDomain *Users) (*types.Coupon, error) {
 	couponRequest := types.CreateNewCouponRequest{}
 
 	if err := json.Unmarshal(body, &couponRequest); err != nil {
@@ -91,6 +100,15 @@ func (c *Coupons) PutCoupon(ctx context.Context, id *string, body []byte) (*type
 	coupon.ValidFrom = time.Now()
 	coupon.ValidUntil = couponRequest.ExpiresAt.Time
 	coupon.OfferDesc = couponRequest.OfferDesc
+
+	// !IMPORTANT: ONLY FOR THE FIRST PART OF THE PROJECT, SELECT A RANDOM ENTERPRISE FROM AN ALREADY DEFINED ARRAY
+	randIndex := rand.IntN(5)
+	coupon.EnterpriseId = EnterprisesIds[randIndex]
+	enterprise, err := userDomain.GetEnterprise(ctx, EnterprisesIds[randIndex])
+	if err != nil {
+		return nil, fmt.Errorf("provided enterprise not found")
+	}
+	coupon.Category = enterprise.Category
 
 	if id != nil {
 		coupon.Id = *id

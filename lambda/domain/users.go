@@ -228,9 +228,8 @@ func (u *Users) GetEmployee(ctx context.Context, username string) (*types.Employ
 }
 
 // TODO Implement the rest of the user retrieval methods
-/*
-func (u *Users) GetEnterprise(ctx context.Context, username string) (*types.Enterprise, error) {
-	enterprise, err := u.store.GetEnterprise(ctx, username)
+func (u *Users) GetEnterprise(ctx context.Context, enterpriseCode string) (*types.Enterprise, error) {
+	enterprise, err := u.store.GetEnterprise(ctx, enterpriseCode)
 
 	if err != nil {
 		return &types.Enterprise{}, err
@@ -239,6 +238,7 @@ func (u *Users) GetEnterprise(ctx context.Context, username string) (*types.Ente
 	return &enterprise, nil
 }
 
+/*
 func (u *Users) GetAdministrator(ctx context.Context, username string) (*types.Administrator, error) {
 	administrator, err := u.store.GetAdministrator(ctx, username)
 

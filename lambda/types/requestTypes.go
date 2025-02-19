@@ -1,6 +1,9 @@
 package types
 
-import "time"
+import (
+	"encoding/json"
+	"time"
+)
 
 type CustomTime struct {
 	Time time.Time
@@ -32,11 +35,29 @@ type CreateNewCouponRequest struct {
 	RegularPrice     float32    `json:"regularPrice" validate:"required,gte=0"`
 	OfferPrice       float32    `json:"offerPrice" validate:"required,gte=0"`
 	AvailableCoupons int        `json:"availableCoupons" validate:"required,gte=1"`
-	ExpiresAt        CustomTime `json:"expiresAt" validate:"required,gt"`
+	ExpiresAt        CustomTime `json:"expiresAt" validate:"required"`
 	OfferDesc        string     `json:"offerDesc" validate:"required"`
 }
 
 type LoginRequest struct {
 	Username string `json:"username" validator:"required"`
 	Password string `json:"password" validator:"required"`
+}
+
+func (c *CustomTime) UnmarshalJSON(data []byte) error {
+	// parse the date in a YYYY-MM-DD format
+	var timeString string
+
+	if err := json.Unmarshal(data, &timeString); err != nil {
+		return err
+	}
+
+	newTime, err := time.Parse(DATE_YYYY_MM_DD, timeString)
+
+	if err != nil {
+		return err
+	}
+
+	c.Time = newTime
+	return nil
 }

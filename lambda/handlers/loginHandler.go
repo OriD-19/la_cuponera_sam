@@ -20,7 +20,7 @@ func (handler *APIGatewayHandler) LoginClient(ctx context.Context, request event
 	err := json.Unmarshal([]byte(request.Body), &loginRequest)
 
 	if err != nil {
-		return ErrResponse(http.StatusBadRequest, "failed to parse credentials from request body"), err
+		return ErrResponse(http.StatusBadRequest, "failed to parse credentials from request body"), nil
 	}
 
 	// validate the login request information
@@ -29,13 +29,13 @@ func (handler *APIGatewayHandler) LoginClient(ctx context.Context, request event
 	err = validate.Struct(loginRequest)
 
 	if err != nil {
-		return ErrResponse(http.StatusBadRequest, "invalid username or password"), err
+		return ErrResponse(http.StatusBadRequest, "invalid username or password"), nil
 	}
 
 	client, err := handler.users.GetClient(ctx, loginRequest.Username)
 
 	if err != nil {
-		return ErrResponse(http.StatusNotFound, err.Error()), err
+		return ErrResponse(http.StatusNotFound, err.Error()), nil
 	}
 
 	if !types.ValidatePassword(client.Password, loginRequest.Password) {

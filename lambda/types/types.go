@@ -14,12 +14,13 @@ var SECRET = os.Getenv("SECRET")
 
 const DATE_YYYY_MM_DD = "2006-01-02"
 
+type Entity struct {
+	EntityType string `json:"-" dynamodbav:"entityType" validator:"oneof=client administrator enterprise employee offer"`
+}
+
 // ************************************************************
 // USER ENTITIES
 // ************************************************************
-type Entity struct {
-	EntityType string `dynamodbav:"entityType" validator:"oneof=client administrator enterprise employee offer"`
-}
 
 type User struct {
 	Entity
@@ -96,6 +97,7 @@ type Coupon struct {
 	// Can have any structure for other properties defined in the UI
 	// the idea is that is a nested details object
 	EnterpriseId string `dynamodbav:"enterpriseCode" json:"enterpriseCode" validate:"required"`
+	Category     string `dynamodbav:"category" json:"category"`
 }
 
 // struct for a generated coupon (the one that user buys, not the general offer)
@@ -116,7 +118,6 @@ type CouponRange struct {
 
 type OfferRange struct {
 	Offers []GeneratedOffer `json:"offers"`
-	Next   *string          `json:"next"`
 }
 
 func ValidatePassword(hashedPassword, plainTextPassword string) bool {
@@ -247,16 +248,4 @@ func GetClientAuthFromHeader(headers map[string]string) (Client, error) {
 			Username: username,
 		},
 	}, nil
-}
-
-func (c *CustomTime) UnmarshalJSON(data []byte) error {
-	// parse the date in a YYYY-MM-DD format
-	newTime, err := time.Parse(DATE_YYYY_MM_DD, string(data))
-
-	if err != nil {
-		return err
-	}
-
-	c.Time = newTime
-	return nil
 }

@@ -276,7 +276,7 @@ func (d *DynamoDBStore) BuyCoupon(c context.Context, couponId string, userId str
 
 	newGenOffer.EntityType = "generatedOffer"
 	newGenOffer.Id = generatedId
-	newGenOffer.UserId = user.Email
+	newGenOffer.UserId = user.Username // username as the ID of the user
 	newGenOffer.CouponId = coupon.Id
 	newGenOffer.GeneratedAt = time.Now()
 	newGenOffer.ExpirationDate = coupon.ValidUntil
@@ -321,7 +321,7 @@ func (d *DynamoDBStore) GetUserOffers(c context.Context, userId string) (types.O
 		return offers, err
 	}
 
-	err = attributevalue.UnmarshalListOfMaps(result.Items, &offers)
+	err = attributevalue.UnmarshalListOfMaps(result.Items, &offers.Offers)
 
 	if err != nil {
 		return offers, fmt.Errorf("failed to unmarshal data from DynamoDB: %w", err)

@@ -36,11 +36,23 @@ func (handler *APIGatewayHandler) GetCouponHandler(ctx context.Context, request 
 		return ErrResponse(http.StatusInternalServerError, err.Error()), err
 	}
 
+	var couponResponse types.CouponResponseType
+
+	couponResponse.Coupon = *coupon
+
+	enterprise, err := handler.users.GetEnterprise(ctx, coupon.EnterpriseId)
+
+	if err != nil {
+		return ErrResponse(http.StatusNotFound, "enterprise code not found (possibly deleted)"), nil
+	}
+
+	couponResponse.EnterpriseDetails = *enterprise
+
 	if coupon == nil {
 		return ErrResponse(http.StatusNotFound, "coupon not found"), nil
 	}
 
-	return Response(200, coupon), nil
+	return Response(200, couponResponse), nil
 }
 
 func (handler *APIGatewayHandler) GetAllCouponsFromCategoryHandler(ctx context.Context, request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
@@ -73,7 +85,7 @@ func (handler *APIGatewayHandler) PutCouponHandler(ctx context.Context, request 
 		couponId = &id
 	}
 
-	coupon, err := handler.coupons.PutCoupon(ctx, couponId, []byte(request.Body))
+	coupon, err := handler.coupons.PutCoupon(ctx, couponId, []byte(request.Body), handler.users)
 
 	if err != nil {
 		if errors.Is(err, domain.ErrJsonUnmarshal) {
@@ -129,14 +141,14 @@ func (handler *APIGatewayHandler) BuyCouponHandler(ctx context.Context, request 
 }
 
 func (handler *APIGatewayHandler) GetUserOffersHandler(ctx context.Context, request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
-	// extract user id from jwt token
-	id, ok := request.PathParameters["userId"]
+	// DONE: extract user id from jwt token
+	client, err := types.GetClientAuthFromHeader(request.Headers)
 
-	if !ok {
-		return ErrResponse(http.StatusBadRequest, "missing 'id' parameter in path"), nil
+	if err != nil {
+		return ErrResponse(401, "client not found"), nil
 	}
 
-	offers, err := handler.coupons.GetUserOffers(ctx, id)
+	offers, err := handler.coupons.GetUserOffers(ctx, client.Username)
 
 	if err != nil {
 		return ErrResponse(http.StatusInternalServerError, err.Error()), err

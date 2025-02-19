@@ -25,7 +25,7 @@ For building this project, the following programs and their specific versions we
 - Operating System: Windows (Linux for Lambda binaries)
 
 ### TODOS
-[x] Protect the route for querying all user's offers
-[ ] Coupon category system, for easy querying
-[ ] Fix the category system: include both the enterprise ID and the coupon category in the same entity
-[x] More descriptive error code when a user does not exist
+- [x] Protect the route for querying all user's offers
+- [x] Coupon category system, for easy querying
+- [x] Fix the category system: include both the enterprise ID and the coupon category in the same entity
+- [x] More descriptive error code when a user does not exist

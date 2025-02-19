@@ -7,6 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"strings"
+	"time"
 
 	"github.com/go-playground/validator/v10"
 	"github.com/google/uuid"
@@ -87,7 +88,8 @@ func (c *Coupons) PutCoupon(ctx context.Context, id *string, body []byte) (*type
 	coupon.RegularPrice = couponRequest.RegularPrice
 	coupon.OfferPrice = couponRequest.OfferPrice
 	coupon.AvailableCoupons = couponRequest.AvailableCoupons
-	coupon.ValidUntil = couponRequest.ExpiresAt
+	coupon.ValidFrom = time.Now()
+	coupon.ValidUntil = couponRequest.ExpiresAt.Time
 	coupon.OfferDesc = couponRequest.OfferDesc
 
 	if id != nil {

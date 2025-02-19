@@ -12,11 +12,13 @@ import (
 
 var SECRET = os.Getenv("SECRET")
 
+const DATE_YYYY_MM_DD = "2006-01-02"
+
 // ************************************************************
 // USER ENTITIES
 // ************************************************************
 type Entity struct {
-	EntityType string `dynamodbav:"entityType" json:"entityType" validator:"oneof=client administrator enterprise employee offer"`
+	EntityType string `dynamodbav:"entityType" validator:"oneof=client administrator enterprise employee offer"`
 }
 
 type User struct {
@@ -69,6 +71,7 @@ type Employee struct {
 // COUPON ENTITIES
 // ************************************************************
 
+// store a YYYY_MM_DD time format, and parse it with an UnmarshalJSON custom method
 type RegisteredCoupon struct {
 	CouponId string `dynamodbav:"couponId" json:"couponId"`
 	Status   string `dynamodbav:"status" json:"status"`
@@ -244,4 +247,16 @@ func GetClientAuthFromHeader(headers map[string]string) (Client, error) {
 			Username: username,
 		},
 	}, nil
+}
+
+func (c *CustomTime) UnmarshalJSON(data []byte) error {
+	// parse the date in a YYYY-MM-DD format
+	newTime, err := time.Parse(DATE_YYYY_MM_DD, string(data))
+
+	if err != nil {
+		return err
+	}
+
+	c.Time = newTime
+	return nil
 }

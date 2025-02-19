@@ -2,6 +2,10 @@ package types
 
 import "time"
 
+type CustomTime struct {
+	Time time.Time
+}
+
 type RegisterClientRequest struct {
 	Username    string `json:"username" validate:"required"`
 	Email       string `json:"email" validate:"required,email"`
@@ -24,12 +28,12 @@ type RegisterEmployeeRequest struct {
 }
 
 type CreateNewCouponRequest struct {
-	Title            string    `json:"title" validate:"required"`
-	RegularPrice     float32   `json:"regularPrice" validate:"required,gte=0"`
-	OfferPrice       float32   `json:"offerPrice" validate:"required,gte=0"`
-	AvailableCoupons int       `json:"availableCoupons" validate:"required,gte=1"`
-	ExpiresAt        time.Time `json:"expiresAt" validate:"required,gt"`
-	OfferDesc        string    `json:"offerDesc" validate:"required"`
+	Title            string     `json:"title" validate:"required"`
+	RegularPrice     float32    `json:"regularPrice" validate:"required,gte=0"`
+	OfferPrice       float32    `json:"offerPrice" validate:"required,gte=0"`
+	AvailableCoupons int        `json:"availableCoupons" validate:"required,gte=1"`
+	ExpiresAt        CustomTime `json:"expiresAt" validate:"required,gt"`
+	OfferDesc        string     `json:"offerDesc" validate:"required"`
 }
 
 type LoginRequest struct {

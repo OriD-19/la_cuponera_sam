@@ -7,6 +7,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"math/rand/v2"
 	"time"
 
 	"github.com/go-playground/validator/v10"
@@ -38,7 +39,7 @@ func (u *Users) RegisterClient(ctx context.Context, body []byte) (*types.Client,
 		return &types.Client{}, err
 	}
 
-	// check if email is not taken
+	// check if username is not taken
 	_, err = u.store.GetClient(ctx, clientRegisterRequest.Username)
 
 	if err == nil {
@@ -91,10 +92,10 @@ func (u *Users) RegisterEmployee(ctx context.Context, body []byte) (*types.Emplo
 		return &types.Employee{}, err
 	}
 
-	_, err = u.store.GetEmployee(ctx, employeeRegisterRequest.Email)
+	_, err = u.store.GetEmployee(ctx, employeeRegisterRequest.Username)
 
 	if err == nil {
-		return &types.Employee{}, fmt.Errorf("email %s is already taken", employeeRegisterRequest.Email)
+		return &types.Employee{}, fmt.Errorf("username %s is already taken", employeeRegisterRequest.Username)
 	}
 
 	// hash password before storing the user
@@ -113,6 +114,11 @@ func (u *Users) RegisterEmployee(ctx context.Context, body []byte) (*types.Emplo
 	employee.LastName = employeeRegisterRequest.LastName
 	employee.PhoneNumber = employeeRegisterRequest.PhoneNumber
 	employee.DUI = employeeRegisterRequest.DUI
+	employee.CreatedAt = time.Now()
+
+	// !TESTING ONLY: associate a user with a random enterprise when logging in
+	randNum := rand.IntN(5)
+	employee.EnterpriseId = EnterprisesIds[randNum]
 
 	err = u.store.RegisterEmployee(ctx, employee)
 

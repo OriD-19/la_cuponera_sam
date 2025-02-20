@@ -60,6 +60,9 @@ func (d *DynamoDBStore) GetAllCoupons(ctx context.Context, nextToken *string) (t
 
 	if nextToken != nil {
 		input.ExclusiveStartKey = map[string]ddbtypes.AttributeValue{
+			"entityType": &ddbtypes.AttributeValueMemberS{
+				Value: "coupon",
+			},
 			"id": &ddbtypes.AttributeValueMemberS{
 				Value: *nextToken,
 			},
@@ -70,7 +73,7 @@ func (d *DynamoDBStore) GetAllCoupons(ctx context.Context, nextToken *string) (t
 
 	if err != nil {
 		// return empty coupon range and error
-		return couponRange, err
+		return couponRange, fmt.Errorf("the error is inside the query syntax: %w", err)
 	}
 
 	// take the result from dynamodb, and put it into the coupon range
@@ -82,7 +85,8 @@ func (d *DynamoDBStore) GetAllCoupons(ctx context.Context, nextToken *string) (t
 
 	if len(result.LastEvaluatedKey) > 0 {
 		if key, ok := result.LastEvaluatedKey["id"]; ok {
-			couponRange.Next = &key.(*ddbtypes.AttributeValueMemberS).Value
+			nextKey := key.(*ddbtypes.AttributeValueMemberS).Value
+			couponRange.Next = &nextKey
 		}
 	}
 
@@ -597,6 +601,10 @@ func (d *DynamoDBStore) GetEmployee(c context.Context, id string) (types.Employe
 
 	if err != nil {
 		return types.Employee{}, err
+	}
+
+	if len(result.Item) == 0 {
+		return types.Employee{}, fmt.Errorf("employee not found")
 	}
 
 	var employee types.Employee

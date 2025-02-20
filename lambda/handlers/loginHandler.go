@@ -4,7 +4,6 @@ import (
 	"OriD19/webdev2/types"
 	"context"
 	"encoding/json"
-	"fmt"
 	"net/http"
 
 	"github.com/aws/aws-lambda-go/events"
@@ -44,10 +43,18 @@ func (handler *APIGatewayHandler) LoginClient(ctx context.Context, request event
 
 	token := types.CreateTokenClient(*client)
 
+	type LoginClientResponse struct {
+		AuthToken string       `json:"authToken"`
+		Client    types.Client `json:"client"`
+	}
+
+	lcRes := LoginClientResponse{
+		AuthToken: token,
+		Client:    *client,
+	}
+
 	// create a new JWT
-	return Response(http.StatusOK, map[string]string{
-		"access_token": token,
-	}), nil
+	return Response(http.StatusOK, lcRes), nil
 }
 
 func (handler *APIGatewayHandler) LoginEmployee(ctx context.Context, request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
@@ -57,7 +64,7 @@ func (handler *APIGatewayHandler) LoginEmployee(ctx context.Context, request eve
 	err := json.Unmarshal([]byte(request.Body), &loginRequest)
 
 	if err != nil {
-		return ErrResponse(http.StatusBadRequest, "failed to parse credentials from request body"), err
+		return ErrResponse(http.StatusBadRequest, "failed to parse credentials from request body"), nil
 	}
 
 	// validate the login request information
@@ -66,13 +73,13 @@ func (handler *APIGatewayHandler) LoginEmployee(ctx context.Context, request eve
 	err = validate.Struct(loginRequest)
 
 	if err != nil {
-		return ErrResponse(http.StatusBadRequest, "invalid username or password"), err
+		return ErrResponse(http.StatusBadRequest, "invalid username or password"), nil
 	}
 
 	employee, err := handler.users.GetEmployee(ctx, loginRequest.Username)
 
 	if err != nil {
-		return ErrResponse(http.StatusNotFound, err.Error()), err
+		return ErrResponse(http.StatusNotFound, err.Error()), nil
 	}
 
 	if !types.ValidatePassword(employee.Password, loginRequest.Password) {
@@ -80,9 +87,17 @@ func (handler *APIGatewayHandler) LoginEmployee(ctx context.Context, request eve
 	}
 
 	token := types.CreateTokenEmployee(*employee)
-	successMsg := fmt.Sprintf(`{"access_token": "%s"}`, token)
+
+	type LoginEmployeeReponse struct {
+		AuthToken string         `json:"authToken"`
+		Employee  types.Employee `json:"employee"`
+	}
+
+	leRes := LoginEmployeeReponse{
+		AuthToken: token,
+		Employee:  *employee,
+	}
 
 	// create a new JWT
-	return Response(http.StatusOK, successMsg), nil
-
+	return Response(http.StatusOK, leRes), nil
 }

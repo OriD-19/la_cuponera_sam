@@ -84,6 +84,22 @@ func NewLaCuponeraSamStack(scope constructs.Construct, id string, props *LaCupon
 		DefaultCorsPreflightOptions: &awsapigateway.CorsOptions{
 			AllowOrigins: jsii.Strings("*"),
 			AllowMethods: jsii.Strings("GET", "POST", "PUT", "DELETE"),
+			AllowHeaders: jsii.Strings(
+				"Access-Control-Allow-Headers",
+				"Acces-Control-Allow-Origin",
+				"Origin",
+				"Accept",
+				"X-Requested-With",
+				"Content-Type",
+				"Access-Control-Request-Method",
+				"Access-Control-Request-Headers",
+				"Content-Type",
+				"X-Amz-Date",
+				"Authorization",
+				"X-Api-Key",
+				"X-Amz-Securit-Token",
+				"X-Amz-User-Agent",
+			),
 		},
 		DeployOptions: &awsapigateway.StageOptions{
 			// enable logging (maybe, who cares)
@@ -158,6 +174,10 @@ func NewLaCuponeraSamStack(scope constructs.Construct, id string, props *LaCupon
 	// register a new user of type client
 	// POST /users/client/register
 	usersResource.AddResource(jsii.String("client"), nil).
+		AddResource(jsii.String("register"), nil).
+		AddMethod(jsii.String("POST"), usersIntegration, nil)
+
+	usersResource.AddResource(jsii.String("employee"), nil).
 		AddResource(jsii.String("register"), nil).
 		AddMethod(jsii.String("POST"), usersIntegration, nil)
 

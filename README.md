@@ -29,3 +29,4 @@ For building this project, the following programs and their specific versions we
 - [x] Coupon category system, for easy querying
 - [x] Fix the category system: include both the enterprise ID and the coupon category in the same entity
 - [x] More descriptive error code when a user does not exist
+- [ ] Employee registration and login system

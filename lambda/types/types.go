@@ -26,7 +26,7 @@ type User struct {
 	Entity
 	Email     string    `dynamodbav:"email" json:"email" validator:"required,email"` // email is the id
 	Username  string    `dynamodbav:"id" json:"username" validator:"required,max=100"`
-	Password  string    `dynamodbav:"password" json:"password" validator:"required,min=8"`
+	Password  string    `dynamodbav:"password" json:"-"  validator:"required,min=8"`
 	CreatedAt time.Time `dynamodbav:"createdAt" json:"createdAt" validator:"required"`
 
 	// a single user can have many coupons, and a single coupon can be owned by many users
@@ -62,10 +62,11 @@ type Administrator struct {
 
 type Employee struct {
 	User
-	FirstName   string `dynamodbav:"firstName" json:"firstName"`
-	LastName    string `dynamodbav:"lastName" json:"lastName"`
-	PhoneNumber string `dynamodbav:"phoneNumber" json:"phoneNumber"`
-	DUI         string `dynamodbav:"dui" json:"dui"`
+	FirstName    string `dynamodbav:"firstName" json:"firstName"`
+	LastName     string `dynamodbav:"lastName" json:"lastName"`
+	PhoneNumber  string `dynamodbav:"phoneNumber" json:"phoneNumber"`
+	DUI          string `dynamodbav:"dui" json:"dui"`
+	EnterpriseId string `dynamodbav:"enterpriseCode" json:"enterpriseCode"`
 }
 
 // ************************************************************
@@ -188,7 +189,7 @@ func HashPassword(password string) (string, error) {
 	return password, nil
 }
 
-func extractTokenFromHeaders(headers map[string]string) string {
+func ExtractTokenFromHeaders(headers map[string]string) string {
 	authHeader, ok := headers["Authorization"]
 
 	if !ok {
@@ -204,7 +205,7 @@ func extractTokenFromHeaders(headers map[string]string) string {
 	return splitToken[1]
 }
 
-func parseToken(tokenString string) (jwt.MapClaims, error) {
+func ParseToken(tokenString string) (jwt.MapClaims, error) {
 	token, err := jwt.Parse(tokenString, func(t *jwt.Token) (interface{}, error) {
 		secret := []byte(os.Getenv("SECRET"))
 		return secret, nil
@@ -229,13 +230,13 @@ func parseToken(tokenString string) (jwt.MapClaims, error) {
 }
 
 func GetClientAuthFromHeader(headers map[string]string) (Client, error) {
-	tokenString := extractTokenFromHeaders(headers)
+	tokenString := ExtractTokenFromHeaders(headers)
 
 	if tokenString == "" {
 		return Client{}, nil
 	}
 
-	claims, err := parseToken(tokenString)
+	claims, err := ParseToken(tokenString)
 
 	if err != nil {
 		return Client{}, err

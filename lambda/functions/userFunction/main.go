@@ -45,6 +45,18 @@ func main() {
 					Body:       request.Path + " " + request.Resource + ": Not found",
 				}, nil
 			}
+		// !TESTING PURPOSES ONLY, employees can only be registered by an admin,
+		// but that is for the next part of the project, ofc
+		case "/users/employee/register":
+			switch request.HTTPMethod {
+			case "POST":
+				return handler.RegisterEmployee(ctx, request)
+			default:
+				return events.APIGatewayProxyResponse{
+					StatusCode: 404,
+					Body:       request.Path + " " + request.Resource + ": Not found",
+				}, nil
+			}
 		default:
 			return events.APIGatewayProxyResponse{
 				StatusCode: 404,

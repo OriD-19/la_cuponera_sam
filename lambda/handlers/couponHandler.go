@@ -101,16 +101,30 @@ func (handler *APIGatewayHandler) PutCouponHandler(ctx context.Context, request 
 }
 
 func (handler *APIGatewayHandler) RedeemCouponHandler(ctx context.Context, request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
-	id, ok := request.PathParameters["id"]
+	id, ok := request.PathParameters["offerId"]
 
 	if !ok {
-		return ErrResponse(http.StatusBadRequest, "missing 'id' parameter in path"), nil
+		return ErrResponse(http.StatusBadRequest, "missing 'offerId' parameter in path"), nil
+	}
+
+	// check if the employee is authorized to redeem the coupon
+
+	tokenString := types.ExtractTokenFromHeaders(request.Headers)
+	claims, _ := types.ParseToken(tokenString)
+
+	username := claims["username"].(string)
+	employee, _ := handler.users.GetEmployee(ctx, username)
+	offer, _ := handler.coupons.GetGeneratedOffer(ctx, id)
+	coupon, _ := handler.coupons.GetCoupon(ctx, offer.CouponId)
+
+	if employee.EnterpriseId != coupon.EnterpriseId {
+		return ErrResponse(http.StatusForbidden, "you must be an employee of this enterprise to redeem this coupon"), nil
 	}
 
 	err := handler.coupons.RedeemCoupon(ctx, id)
 
 	if err != nil {
-		return ErrResponse(http.StatusInternalServerError, err.Error()), err
+		return ErrResponse(http.StatusBadRequest, err.Error()), nil
 	}
 
 	return Response(200, "coupon redeemed successfully"), nil
@@ -170,6 +184,36 @@ func (handler *APIGatewayHandler) GetUserOfferHandler(ctx context.Context, reque
 
 	if err != nil {
 		return ErrResponse(http.StatusInternalServerError, err.Error()), err
+	}
+
+	// check two cases:
+	// - if the user is a client, check that they are the owner of the offer
+	// - if the user is an employee, check that they are authorized to view the offer (that is, they are employees of the enterprise issuing the coupon)
+
+	tokenString := types.ExtractTokenFromHeaders(request.Headers)
+	claims, _ := types.ParseToken(tokenString)
+
+	userRole := claims["role"].(string)
+	username := claims["username"].(string)
+
+	if userRole == "employee" {
+
+		employee, _ := handler.users.GetEmployee(ctx, username)
+		coupon, _ := handler.coupons.GetCoupon(ctx, offer.CouponId)
+
+		if coupon.EnterpriseId != employee.EnterpriseId {
+			return ErrResponse(http.StatusForbidden, "you must be an employee of this enterprise to access this information"), nil
+		}
+
+	} else if userRole == "client" {
+		client, _ := handler.users.GetClient(ctx, username)
+
+		if offer.UserId != client.Username {
+			return ErrResponse(http.StatusForbidden, "you must be the owner of this offer to view it"), nil
+		}
+
+	} else {
+		return ErrResponse(http.StatusForbidden, "not authorized for this action"), nil
 	}
 
 	return Response(200, offer), nil

@@ -15,9 +15,9 @@ func (handler *APIGatewayHandler) RegisterClient(ctx context.Context, request ev
 	client, err := handler.users.RegisterClient(ctx, []byte(request.Body))
 
 	if errors.Is(err, domain.ErrJsonUnmarshal) {
-		return ErrResponse(http.StatusBadRequest, "failed to parse client from request body"), err
+		return ErrResponse(http.StatusBadRequest, "failed to parse client from request body"), nil
 	} else if err != nil {
-		return ErrResponse(http.StatusBadRequest, "username already taken"), err
+		return ErrResponse(http.StatusBadRequest, "username already taken"), nil
 	}
 
 	return Response(http.StatusOK, client), nil
@@ -36,6 +36,7 @@ func (handler *APIGatewayHandler) RegisterEnterprise(ctx context.Context, reques
 
 	return Response(http.StatusOK, enterprise), nil
 }
+*/
 
 func (handler *APIGatewayHandler) RegisterEmployee(ctx context.Context, request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
 
@@ -49,7 +50,6 @@ func (handler *APIGatewayHandler) RegisterEmployee(ctx context.Context, request 
 
 	return Response(http.StatusOK, employee), nil
 }
-*/
 
 func (handler *APIGatewayHandler) GetClient(ctx context.Context, request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
 	id, ok := request.PathParameters["userId"]

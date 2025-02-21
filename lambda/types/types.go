@@ -106,6 +106,8 @@ type GeneratedOffer struct {
 	Entity
 	Id             string    `dynamodbav:"id" json:"id"` // this id will be the generated token for the offer
 	CouponId       string    `dynamodbav:"couponId" json:"couponId"`
+	OfferPrice     float32   `dynamodbav:"offerPrice" json:"offerPrice"`
+	RegularPrice   float32   `dynamodbav:"regularPrice" json:"regularPrice"`
 	UserId         string    `dynamodbav:"userId" json:"userId"`
 	GeneratedAt    time.Time `dynamodbav:"generatedAt" json:"generatedAt"`
 	ExpirationDate time.Time `dynamodbav:"validUntil" json:"validUntil"`

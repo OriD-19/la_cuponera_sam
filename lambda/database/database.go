@@ -285,6 +285,8 @@ func (d *DynamoDBStore) BuyCoupon(c context.Context, couponId string, userId str
 	newGenOffer.GeneratedAt = time.Now()
 	newGenOffer.ExpirationDate = coupon.ValidUntil
 	newGenOffer.Redeemed = false
+	newGenOffer.RegularPrice = coupon.RegularPrice
+	newGenOffer.OfferPrice = coupon.OfferPrice
 
 	// save the generated offer in the database
 	err = d.PutGeneratedOffer(c, newGenOffer)

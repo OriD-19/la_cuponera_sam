@@ -216,5 +216,20 @@ func (handler *APIGatewayHandler) GetUserOfferHandler(ctx context.Context, reque
 		return ErrResponse(http.StatusForbidden, "not authorized for this action"), nil
 	}
 
-	return Response(200, offer), nil
+	type OfferDetailsResponse struct {
+		Offer      types.GeneratedOffer `json:"offer"`
+		Enterprise types.Enterprise     `json:"enterprise"`
+		Client     types.Client         `json:"client"`
+	}
+
+	coupon, _ := handler.coupons.GetCoupon(ctx, offer.CouponId)
+	enterprise, _ := handler.users.GetEnterprise(ctx, coupon.EnterpriseId)
+	client, _ := handler.users.GetClient(ctx, offer.UserId)
+
+	var ofRes OfferDetailsResponse
+	ofRes.Offer = *offer
+	ofRes.Enterprise = *enterprise
+	ofRes.Client = *client
+
+	return Response(200, ofRes), nil
 }
